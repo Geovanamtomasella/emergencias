@@ -7,35 +7,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: "Modern Health Blue" - A base of #f0f4f8 (light slate), com um primário #003366 (deep navy) e um destaque #3b82f6 (blue-500). -->
-    <!-- Application Structure Plan: A SPA com layout de abas temáticas. A navegação fixa permite alternar entre seções-chave: 1) Visão Geral; 2) Regulamentações; 3) Estrutura; 4) Equipes; 5) Processos; 6) Comissões; 7) Indicadores; 8) Referências. A aba Visão Geral agora funciona como um índice, e a antiga aba Tipos de Emergência foi expandida para a aba Regulamentações. -->
-    <!-- Visualization & Content Choices: 
-        - Reguladores: Cartões interativos (HTML/CSS).
-        - Regulamentações: Cards informativos para detalhar a PNAU, RDCs e resoluções dos conselhos, agora com mais detalhes.
-        - Estrutura Física: Mapa visual (HTML/CSS Grid) e diagrama de blocos clicáveis (HTML/CSS+JS).
-        - Processos: Acordeão interativo (HTML/CSS+JS) com exemplos de classificação do HumanizaSUS.
-        - Comissões: Seção com cartões informativos para todas as comissões relevantes.
-        - Indicadores: Dashboard de KPIs expandido com mais exemplos e fórmulas.
-        - Dimensionamento: Ferramenta interativa com inputs e gráfico de rosca (Chart.js), integrada na aba 'Equipes'.
-        - Referências: Lista estruturada com links para download.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            color: #1f2937;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        :root {
+            --primary-dark-blue: #0A2342;
+            --primary-teal: #00A79D;
         }
         .section-title {
-            color: #003366;
+            color: var(--primary-dark-blue);
         }
         .tab-button {
             transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
         }
         .tab-button.active {
-            border-bottom-color: #3b82f6;
-            color: #003366;
+            border-bottom-color: var(--primary-teal);
+            color: var(--primary-dark-blue);
         }
         .chart-container {
             position: relative;
@@ -67,17 +58,25 @@
             transition: background-color 0.3s, color 0.3s;
         }
         .protocol-tab.active {
-            background-color: #003366;
+            background-color: var(--primary-dark-blue);
             color: white;
+        }
+        .fmea-table th, .fmea-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+        }
+        .ishikawa-bone {
+            border-top: 2px solid #9ca3af;
         }
     </style>
 </head>
 <body class="antialiased">
 
     <div class="bg-white">
-        <header class="bg-[#003366] shadow-md">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                 <h1 class="text-white text-2xl md:text-3xl font-bold text-center">Guia Interativo de Estruturação de Unidades de Emergência</h1>
+        <header class="bg-[--primary-dark-blue] shadow-lg">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                 <h1 class="text-white text-2xl md:text-4xl font-bold text-center">Guia Interativo de Estruturação de Unidades de Emergência</h1>
             </div>
         </header>
 
@@ -101,50 +100,81 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
+            const icons = {
+                visaoGeral: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`,
+                tiposEmergencia: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h2l2.5-7.5L12 17l2.5-10L17 12h4" /></svg>`,
+                estrutura: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+                equipes: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`,
+                processos: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+                comissoes: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>`,
+                indicadores: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
+                referencias: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
+                contato: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`
+            };
+            
             const sections = [
-                { id: 'visao-geral', title: 'Visão Geral', icon: '👁️' },
-                { id: 'regulamentacoes', title: 'Regulamentações', icon: '📜' },
-                { id: 'estrutura', title: 'Estrutura', icon: '🗺️' },
-                { id: 'equipes', title: 'Equipes', icon: '🧑‍⚕️' },
-                { id: 'processos', title: 'Processos', icon: '🔄' },
-                { id: 'comissoes', title: 'Comissões', icon: '📋' },
-                { id: 'indicadores', title: 'Indicadores', icon: '📊' },
-                { id: 'referencias', title: 'Referências', icon: '📖' }
+                { id: 'visao-geral', title: 'Visão Geral', icon: icons.visaoGeral },
+                { id: 'tipos-emergencia', title: 'Tipos de Emergência', icon: icons.tiposEmergencia },
+                { id: 'estrutura', title: 'Estrutura', icon: icons.estrutura },
+                { id: 'equipes', title: 'Equipes', icon: icons.equipes },
+                { id: 'processos', title: 'Processos', icon: icons.processos },
+                { id: 'comissoes', title: 'Comissões', icon: icons.comissoes },
+                { id: 'indicadores', title: 'Indicadores', icon: icons.indicadores },
+                { id: 'referencias', title: 'Referências', icon: icons.referencias },
+                { id: 'contato', title: 'Contato', icon: icons.contato }
             ];
 
             const tabButtonsContainer = document.getElementById('tab-buttons');
             const tabContentsContainer = document.getElementById('tab-contents');
-
-            const footerHTML = `<footer class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4 mt-12">Desenvolvido por: Geovana Tomasella, 2025</footer>`;
             
+            const footerHTML = `<footer class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4 mt-12">Desenvolvido por: Geovana Tomasella, 2025</footer>`;
+
             const contentHTML = {
                 'visao-geral': `
-                    <h2 class="section-title text-3xl font-bold text-center mb-2">Visão Geral do Guia</h2>
-                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Este guia interativo consolida as principais normas, processos e ferramentas para a estruturação e gestão de unidades de emergência no Brasil. Navegue pelas abas para explorar cada componente.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        <a href="#" data-tab-link="regulamentacoes" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Regulamentações</h3><p class="text-gray-700 text-sm">Conheça as leis, portarias e resoluções que formam o arcabouço legal dos serviços de emergência.</p></a>
-                        <a href="#" data-tab-link="estrutura" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Estrutura Física</h3><p class="text-gray-700 text-sm">Explore a planta baixa ideal, os dimensionamentos mínimos por sala e os serviços de apoio necessários.</p></a>
-                        <a href="#" data-tab-link="equipes" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Equipes e Dimensionamento</h3><p class="text-gray-700 text-sm">Entenda os papéis e responsabilidades de cada profissional e use a calculadora para dimensionar sua equipe de enfermagem.</p></a>
-                        <a href="#" data-tab-link="processos" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Processos e Fluxos</h3><p class="text-gray-700 text-sm">Navegue pela jornada do paciente, desde a classificação de risco até os protocolos clínicos de IAM, AVC, Sepse e Trauma.</p></a>
-                        <a href="#" data-tab-link="comissoes" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Comissões Obrigatórias</h3><p class="text-gray-700 text-sm">Conheça as comissões essenciais para a governança clínica, segurança e ética na unidade.</p></a>
-                        <a href="#" data-tab-link="indicadores" class="card block bg-white p-6 rounded-lg shadow-lg hover:bg-blue-50"><h3 class="font-bold text-xl text-[#003366] mb-2">Indicadores de Gestão</h3><p class="text-gray-700 text-sm">Monitore os principais KPIs de fluxo, tempo, qualidade e segurança, incluindo os gerenciados pela ANS.</p></a>
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">O Ecossistema Regulatório</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A operação de unidades de emergência no Brasil é uma responsabilidade compartilhada por diversas entidades. Cada uma estabelece regras cruciais para garantir a qualidade e segurança do atendimento. Explore abaixo os principais órgãos reguladores.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                        <div class="card bg-white p-6 rounded-lg shadow-lg text-center border-t-4 border-[--primary-teal]"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-2">Ministério da Saúde (MS)</h3><p class="text-gray-700">Define a política macro, organiza a Rede de Atenção às Urgências (RUE) e estabelece os critérios e portes das Unidades de Pronto Atendimento (UPAs 24h).</p></div>
+                        <div class="card bg-white p-6 rounded-lg shadow-lg text-center border-t-4 border-[--primary-teal]"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-2">ANVISA</h3><p class="text-gray-700">Regula a segurança sanitária, detalhando desde a estrutura física (RDC 50/2002) até as boas práticas de funcionamento e segurança do paciente (RDC 63/2011).</p></div>
+                        <div class="card bg-white p-6 rounded-lg shadow-lg text-center border-t-4 border-[--primary-teal]"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-2">Conselho Federal de Medicina (CFM)</h3><p class="text-gray-700">Normatiza a prática médica, a responsabilidade técnica do diretor clínico e as condições mínimas de trabalho e atendimento nos serviços de urgência.</p></div>
+                        <div class="card bg-white p-6 rounded-lg shadow-lg text-center border-t-4 border-[--primary-teal]"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-2">Conselho Federal de Enfermagem (COFEN)</h3><p class="text-gray-700">Regulamenta a prática profissional de enfermagem e estabelece a metodologia para o dimensionamento de pessoal, garantindo uma equipe adequada à complexidade.</p></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg space-y-10">
+                        <div>
+                            <h3 class="section-title text-2xl font-bold mb-3">RDC nº 50/2002: A Base da Infraestrutura Física</h3>
+                            <p class="text-gray-700 mb-4">A Resolução da Diretoria Colegiada nº 50 da ANVISA é o documento norteador para o planejamento, programação, elaboração e avaliação de projetos físicos de estabelecimentos de assistência à saúde. Ela visa garantir que a estrutura física contribua para a segurança, eficiência e qualidade do atendimento. Seus principais pontos incluem:</p>
+                            <ul class="space-y-3 list-disc list-inside text-gray-600">
+                                <li><strong>Organização por Sistemas Funcionais:</strong> A RDC 50 agrupa os ambientes por similaridade de funções, como Unidade de Emergência, Centro Cirúrgico, Internação, etc., definindo os ambientes mínimos necessários para cada um.</li>
+                                <li><strong>Fluxos e Circulação:</strong> Estabelece a importância de fluxos bem definidos para pacientes, equipe, materiais e resíduos, evitando cruzamentos indesejados (ex: material limpo x material contaminado).</li>
+                                <li><strong>Dimensionamento e Instalações:</strong> Define dimensões mínimas para os cômodos, corredores e vãos de porta, além de especificar requisitos para instalações elétricas, hidrossanitárias e de gases medicinais, garantindo funcionalidade e segurança.</li>
+                                <li><strong>Condições Ambientais:</strong> Exige controle de ventilação, iluminação e ruído, criando um ambiente de cuidado mais seguro e confortável tanto para os pacientes quanto para a equipe.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t border-gray-200 pt-10">
+                             <h3 class="section-title text-2xl font-bold mb-3">RDC nº 7/2010: Requisitos para Unidades de Terapia Intensiva (UTI)</h3>
+                             <p class="text-gray-700 mb-4">Embora as unidades de emergência não sejam UTIs, as Salas de Emergência (Salas Vermelhas) frequentemente funcionam como áreas de estabilização crítica, adotando princípios da terapia intensiva. A RDC 7 da ANVISA estabelece os padrões mínimos para o funcionamento de UTIs, e seus conceitos são cruciais para emergências de alta complexidade:</p>
+                             <ul class="space-y-3 list-disc list-inside text-gray-600">
+                                 <li><strong>Recursos Humanos:</strong> Define a equipe mínima obrigatória, incluindo um médico responsável técnico, um médico diarista, médicos plantonistas, enfermeiros coordenadores e assistenciais, fisioterapeutas, técnicos de enfermagem, entre outros, com proporções específicas por número de leitos.</li>
+                                 <li><strong>Equipamentos e Materiais:</strong> Lista os equipamentos essenciais que devem estar disponíveis em cada leito, como monitores multiparâmetros, ventiladores mecânicos, bombas de infusão, além de acesso rápido a materiais para procedimentos invasivos e carro de emergência completo.</li>
+                                 <li><strong>Infraestrutura:</strong> Define requisitos específicos para a área física da UTI, como área por leito, pontos de gases medicinais, controle de temperatura e acesso restrito, visando a prevenção de infecções e a segurança do paciente grave.</li>
+                                 <li><strong>Processos e Indicadores:</strong> Exige a implementação de protocolos clínicos e assistenciais, bem como o monitoramento de indicadores de qualidade e segurança, como densidade de incidência de infecções e taxa de mortalidade padronizada.</li>
+                             </ul>
+                        </div>
                     </div>
                 `,
-                'regulamentacoes': `
-                    <h2 class="section-title text-3xl font-bold text-center mb-2">Regulamentações dos Serviços de Emergência</h2>
-                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">O funcionamento das unidades de emergência é guiado por um conjunto robusto de normas. Conheça as principais regulamentações que definem desde os conceitos básicos até a estrutura da rede de atendimento.</p>
-                    <div class="space-y-12">
-                        <div><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Política Nacional de Atenção às Urgências (PNAU)</h3><div class="card bg-white p-6 rounded-lg shadow-lg"><p class="text-gray-700">Instituída para organizar a atenção às urgências no SUS, a PNAU estrutura a **Rede de Atenção às Urgências (RUE)**, que integra e articula os diferentes pontos de atenção para garantir um atendimento contínuo, qualificado e humanizado ao paciente.</p><p class="mt-4 font-semibold text-[#003366]">Componentes da RUE:</p><ul class="list-disc list-inside text-gray-700 mt-2"><li>SAMU 192 (componente pré-hospitalar móvel)</li><li>Unidades de Pronto Atendimento (UPA 24h) e outros serviços de urgência</li><li>Portas hospitalares de urgência</li><li>Atenção domiciliar</li></ul><p class="text-xs italic text-gray-500 mt-4">Referência: Portaria de Consolidação MS nº 3/2017</p></div></div>
-                        <div><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Normas de Estrutura e Funcionamento da ANVISA</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[#003366] mb-2">RDC nº 50/2002</h4><p class="text-sm text-gray-700 mb-3">A base para o planejamento físico. Define critérios para:</p><ul class="text-sm list-disc list-inside space-y-1"><li>**Fluxos:** Separação de circulação de pacientes, equipe e materiais (limpos e sujos).</li><li>**Dimensionamento:** Áreas mínimas para salas de consulta, emergência, etc.</li><li>**Acabamentos:** Uso de materiais de fácil higienização em pisos, paredes e tetos.</li></ul></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[#003366] mb-2">RDC nº 63/2011</h4><p class="text-sm text-gray-700 mb-3">Foca nas Boas Práticas de Funcionamento. Exige:</p><ul class="text-sm list-disc list-inside space-y-1"><li>Plano de Gerenciamento de Resíduos (PGRSS).</li><li>Núcleo de Segurança do Paciente (NSP) com protocolos de prevenção.</li><li>Protocolos de higienização das mãos e controle de infecção.</li></ul></div></div></div>
-                        <div><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Níveis de Complexidade: Unidades de Pronto Atendimento (UPA 24h)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[#003366] mb-2">UPA Porte I</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 50 mil a 100 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 150 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 7.</li></ul></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[#003366] mb-2">UPA Porte II</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 100 mil a 200 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 300 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 11.</li></ul></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[#003366] mb-2">UPA Porte III</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 200 mil a 300 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 450 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 15.</li></ul></div></div><p class="text-xs italic text-center text-gray-500 mt-4">Referência Técnica: Portaria de Consolidação MS nº 3/2017 (Anexo III - RUE).</p></div>
-                    </div>
+                'tipos-emergencia': `
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Tipos e Classificações de Emergências</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Compreender a natureza e a gravidade de uma emergência é o primeiro passo para um atendimento eficaz e priorizado.</p>
+                    <div class="mb-12"><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Tipos de Emergência por Natureza</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[--primary-dark-blue] mb-2">Emergências Clínicas</h4><p class="text-gray-700">Originadas por condições médicas agudas ou agudizadas, sem causa externa traumática. Exigem diagnóstico rápido e intervenção terapêutica específica.</p><p class="text-sm font-semibold mt-3">Exemplos: Infarto Agudo do Miocárdio (IAM), Acidente Vascular Cerebral (AVC), Sepse, crises convulsivas.</p></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[--primary-dark-blue] mb-2">Emergências Traumáticas</h4><p class="text-gray-700">Resultantes de eventos externos que causam lesões físicas. O manejo foca na estabilização de lesões que ameaçam a vida (a abordagem "XABCDE" do trauma).</p><p class="text-sm font-semibold mt-3">Exemplos: Acidentes de trânsito, quedas, ferimentos por arma de fogo ou arma branca, queimaduras.</p></div></div></div>
+                    <div class="mb-12"><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Classificação Quanto à Gravidade</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="card bg-yellow-100 border border-yellow-300 p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-yellow-800 mb-2">Urgência</h4><p class="text-yellow-700">Condição que requer atendimento médico rápido, em um curto período de tempo, mas **sem risco de morte iminente**. Se não tratada, pode evoluir para uma emergência.</p></div><div class="card bg-red-100 border border-red-300 p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-red-800 mb-2">Emergência</h4><p class="text-red-700">Condição que implica em **risco iminente de morte** ou de lesões irreparáveis, exigindo tratamento médico imediato e inadiável.</p></div></div><p class="text-xs italic text-center text-gray-500 mt-4">Referências Técnicas: Resolução CFM Nº 1.451/95; Manuais ACLS e PHTLS.</p></div>
+                    <div><h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Níveis de Complexidade: Unidades de Pronto Atendimento (UPA 24h)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[--primary-dark-blue] mb-2">UPA Porte I</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 50 mil a 100 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 150 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 7.</li></ul></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[--primary-dark-blue] mb-2">UPA Porte II</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 100 mil a 200 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 300 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 11.</li></ul></div><div class="card bg-white p-6 rounded-lg shadow-lg"><h4 class="font-bold text-xl text-[--primary-dark-blue] mb-2">UPA Porte III</h4><ul class="space-y-2 text-gray-700 text-sm"><li><strong>População na área:</strong> 200 mil a 300 mil hab.</li><li><strong>Capacidade/dia:</strong> Até 450 pacientes.</li><li><strong>Leitos de Observação:</strong> Mínimo 15.</li></ul></div></div><p class="text-xs italic text-center text-gray-500 mt-4">Referência Técnica: Portaria de Consolidação MS nº 3/2017 (Anexo III - RUE).</p></div>
                 `,
                 'estrutura': `
                     <h2 class="section-title text-3xl font-bold text-center mb-2">Estrutura Física e Dimensionamento</h2>
                     <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Uma estrutura bem planejada, baseada na RDC 50/2002, é fundamental para um fluxo de trabalho seguro e eficiente. Explore o mapa de exemplo e os detalhes de cada área.</p>
-                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8"><h3 class="font-bold text-xl text-[#003366] mb-4 text-center">Exemplo de Planta Baixa Funcional</h3><div class="bg-gray-100 p-4 rounded-lg border-2 border-gray-300"><div class="grid grid-cols-12 grid-rows-6 gap-2 h-[450px]"><div class="col-span-4 row-span-1 bg-gray-300 rounded p-1 flex flex-col items-center justify-center"><span class="font-bold text-xs">ENTRADA AMBULÂNCIA</span><span class="text-2xl mt-1">🚑</span></div><div class="col-span-8 row-span-1 bg-gray-300 rounded p-1 flex items-center justify-center"><span class="font-bold text-xs">RECEPÇÃO / ENTRADA PACIENTES</span></div><div class="col-span-4 row-span-3 bg-red-200 rounded p-2 flex flex-col items-center justify-start border-2 border-red-400"><span class="font-bold text-xs text-red-800">SALA VERMELHA</span><div class="grid grid-cols-2 gap-2 mt-2 w-full flex-grow"><div class="bg-red-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 1</div><div class="bg-red-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 2</div></div></div><div class="col-span-3 row-span-1 bg-blue-200 rounded p-1 flex items-center justify-center"><span class="font-bold text-xs text-blue-800">CLASSIFICAÇÃO</span></div><div class="col-span-5 row-span-1 bg-yellow-200 rounded p-1 flex items-center justify-around"><div class="bg-yellow-400/80 h-10 w-10 rounded"></div><div class="bg-yellow-400/80 h-10 w-10 rounded"></div><span class="font-bold text-xs text-yellow-800">CONSULTÓRIOS</span></div><div class="col-span-8 row-span-2 bg-green-200 rounded p-2 flex flex-col items-center border-2 border-green-400"><span class="font-bold text-xs text-green-800 mb-2">OBSERVAÇÃO</span><div class="grid grid-cols-4 gap-2 w-full h-full"><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 3</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 4</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 5</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 6</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 7</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 8</div></div></div><div class="col-span-4 row-span-2 bg-indigo-200 rounded p-1 flex items-center justify-center text-center"><span class="font-bold text-xs text-indigo-800">ÁREA DE APOIO<br>(Expurgo, DML)</span></div><div class="col-span-8 row-span-2 bg-gray-200 rounded p-2 flex items-center justify-center"><span class="font-bold text-xs text-gray-800">POSTO DE ENFERMAGEM / FARMÁCIA SATÉLITE</span></div></div></div></div>
-                    <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[#003366] mb-4 text-center">Explorador de Áreas de Atendimento (RDC 50/2002)</h3><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="structure-grid"></div><div id="structure-details" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 hidden"><h4 id="details-title" class="font-bold text-lg text-[#003366]"></h4><p id="details-desc" class="mt-1 text-gray-700"></p><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"><div><p class="font-semibold text-gray-800">Dimensionamento Mínimo:</p><p id="details-dim" class="text-gray-600"></p></div><div><p class="font-semibold text-gray-800">Equipamentos Principais:</p><ul id="details-equips" class="mt-2 list-disc list-inside text-gray-600"></ul></div></div><div class="mt-4"><p class="font-semibold text-gray-800">Requisitos Essenciais de Infraestrutura:</p><ul id="details-reqs" class="mt-2 list-disc list-inside text-gray-600"></ul></div></div></div>
-                    <div class="mt-12 bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[#003366] mb-4 text-center">Serviços de Apoio Essenciais</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><div class="card bg-gray-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[#003366] mb-2">Central de Material e Esterilização (CME)</h4><p class="text-sm text-gray-600 mb-3">Responsável pelo processamento, limpeza, desinfecção, esterilização e distribuição de artigos médicos.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Fluxo unidirecional (sujo para limpo).</li><li>Barreiras físicas entre áreas.</li><li>Controle de pressão e temperatura.</li></ul></div><div class="card bg-gray-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[#003366] mb-2">Farmácia Satélite</h4><p class="text-sm text-gray-600 mb-3">Garante o armazenamento seguro e a dispensação rápida de medicamentos para a emergência.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Acesso restrito e controlado.</li><li>Controle de temperatura e umidade.</li><li>Área para manipulação de doses.</li></ul></div><div class="card bg-gray-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[#003366] mb-2">Serviço de Diagnóstico por Imagem</h4><p class="text-sm text-gray-600 mb-3">Realiza exames como Raio-X e Ultrassonografia para auxiliar no diagnóstico rápido e preciso.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Sala baritada e blindada (Raio-X).</li><li>Equipamentos de proteção individual (EPIs).</li><li>Sistema digital ou processadora de imagem.</li></ul></div></div></div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4 text-center">Exemplo de Planta Baixa Funcional</h3><div class="bg-gray-100 p-4 rounded-lg border-2 border-gray-300"><div class="grid grid-cols-12 grid-rows-6 gap-2 h-[450px]"><div class="col-span-4 row-span-1 bg-gray-300 rounded p-1 flex flex-col items-center justify-center"><span class="font-bold text-xs">ENTRADA AMBULÂNCIA</span><span class="text-2xl mt-1">🚑</span></div><div class="col-span-8 row-span-1 bg-gray-300 rounded p-1 flex items-center justify-center"><span class="font-bold text-xs">RECEPÇÃO / ENTRADA PACIENTES</span></div><div class="col-span-4 row-span-3 bg-red-200 rounded p-2 flex flex-col items-center justify-start border-2 border-red-400"><span class="font-bold text-xs text-red-800">SALA VERMELHA</span><div class="grid grid-cols-2 gap-2 mt-2 w-full flex-grow"><div class="bg-red-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 1</div><div class="bg-red-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 2</div></div></div><div class="col-span-3 row-span-1 bg-teal-200 rounded p-1 flex items-center justify-center"><span class="font-bold text-xs text-teal-800">CLASSIFICAÇÃO</span></div><div class="col-span-5 row-span-1 bg-yellow-200 rounded p-1 flex items-center justify-around"><div class="bg-yellow-400/80 h-10 w-10 rounded"></div><div class="bg-yellow-400/80 h-10 w-10 rounded"></div><span class="font-bold text-xs text-yellow-800">CONSULTÓRIOS</span></div><div class="col-span-8 row-span-2 bg-green-200 rounded p-2 flex flex-col items-center border-2 border-green-400"><span class="font-bold text-xs text-green-800 mb-2">OBSERVAÇÃO</span><div class="grid grid-cols-4 gap-2 w-full h-full"><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 3</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 4</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 5</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 6</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 7</div><div class="bg-green-500/80 text-white rounded text-[10px] p-1 flex items-center justify-center">Leito 8</div></div></div><div class="col-span-4 row-span-2 bg-indigo-200 rounded p-1 flex items-center justify-center text-center"><span class="font-bold text-xs text-indigo-800">ÁREA DE APOIO<br>(Expurgo, DML)</span></div><div class="col-span-8 row-span-2 bg-gray-200 rounded p-2 flex items-center justify-center"><span class="font-bold text-xs text-gray-800">POSTO DE ENFERMAGEM / FARMÁCIA SATÉLITE</span></div></div></div></div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4 text-center">Explorador de Áreas de Atendimento (RDC 50/2002)</h3><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="structure-grid"></div><div id="structure-details" class="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200 hidden"><h4 id="details-title" class="font-bold text-lg text-[--primary-dark-blue]"></h4><p id="details-desc" class="mt-1 text-gray-700"></p><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"><div><p class="font-semibold text-gray-800">Dimensionamento Mínimo:</p><p id="details-dim" class="text-gray-600"></p></div><div><p class="font-semibold text-gray-800">Equipamentos Principais:</p><ul id="details-equips" class="mt-2 list-disc list-inside text-gray-600"></ul></div></div><div class="mt-4"><p class="font-semibold text-gray-800">Requisitos Essenciais de Infraestrutura:</p><ul id="details-reqs" class="mt-2 list-disc list-inside text-gray-600"></ul></div></div></div>
+                    <div class="mt-12 bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4 text-center">Serviços de Apoio Essenciais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-slate-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Central de Material e Esterilização (CME)</h4><p class="text-sm text-gray-600 mb-3">Responsável pelo processamento, limpeza, desinfecção, esterilização e distribuição de artigos médicos.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Fluxo unidirecional (sujo para limpo).</li><li>Barreiras físicas entre áreas.</li><li>Controle de pressão e temperatura.</li></ul></div><div class="card bg-slate-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Farmácia Satélite</h4><p class="text-sm text-gray-600 mb-3">Garante o armazenamento seguro e a dispensação rápida de medicamentos para a emergência.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Acesso restrito e controlado.</li><li>Controle de temperatura e umidade.</li><li>Área para manipulação de doses.</li></ul></div><div class="card bg-slate-50 p-4 rounded-lg border"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Serviço de Diagnóstico por Imagem</h4><p class="text-sm text-gray-600 mb-3">Realiza exames como Raio-X e Ultrassonografia para auxiliar no diagnóstico rápido e preciso.</p><ul class="text-sm text-gray-600 list-disc list-inside"><li>Sala baritada e blindada (Raio-X).</li><li>Equipamentos de proteção individual (EPIs).</li><li>Sistema digital ou processadora de imagem.</li></ul></div></div></div>
                 `,
                 'equipes': `
                      <h2 class="section-title text-3xl font-bold text-center mb-2">Guia de Equipes e Dimensionamento</h2>
@@ -152,32 +182,666 @@
                      <div class="mb-12">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Papéis e Responsabilidades</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[#003366] mb-3">Liderança e Equipe Médica</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Diretor Técnico Médico:</strong> Gestão geral da unidade, responsabilidade ética e legal, garantia da qualidade assistencial.</li><li><strong>Médico Emergencista:</strong> Atendimento direto, diagnóstico, prescrição de tratamentos e realização de procedimentos de emergência.</li></ul></div>
-                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[#003366] mb-3">Equipe de Enfermagem</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Enfermeiro:</strong> Liderança da equipe de enfermagem, Classificação de Risco, execução de procedimentos complexos, administração de medicamentos controlados.</li><li><strong>Técnico/Auxiliar:</strong> Cuidados diretos ao paciente (sinais vitais, medicação, higiene), auxílio em procedimentos, organização do ambiente.</li></ul></div>
-                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[#003366] mb-3">Equipe Multidisciplinar</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Fisioterapeuta:</strong> Avaliação e manejo respiratório, suporte em ventilação mecânica, reabilitação motora precoce.</li><li><strong>Farmacêutico:</strong> Controle de estoque, dispensação, farmacovigilância e orientação sobre medicamentos.</li></ul></div>
+                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Liderança e Equipe Médica</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Diretor Técnico Médico:</strong> Gestão geral da unidade, responsabilidade ética e legal, garantia da qualidade assistencial.</li><li><strong>Médico Emergencista:</strong> Atendimento direto, diagnóstico, prescrição de tratamentos e realização de procedimentos de emergência.</li></ul></div>
+                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Equipe de Enfermagem</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Enfermeiro:</strong> Liderança da equipe de enfermagem, Classificação de Risco, execução de procedimentos complexos, administração de medicamentos controlados.</li><li><strong>Técnico/Auxiliar:</strong> Cuidados diretos ao paciente (sinais vitais, medicação, higiene), auxílio em procedimentos, organização do ambiente.</li></ul></div>
+                            <div class="card bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Equipe Multidisciplinar</h3><ul class="space-y-3 text-gray-700 text-sm"><li><strong>Fisioterapeuta:</strong> Avaliação e manejo respiratório, suporte em ventilação mecânica, reabilitação motora precoce.</li><li><strong>Farmacêutico:</strong> Controle de estoque, dispensação, farmacovigilância e orientação sobre medicamentos.</li></ul></div>
                         </div>
                      </div>
                      <div class="mt-12" id="calculadora">
                         <h2 class="section-title text-3xl font-bold text-center mb-2">Calculadora de Dimensionamento de Enfermagem</h2>
                         <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Use esta ferramenta interativa para estimar a equipe de enfermagem necessária com base na complexidade dos pacientes, seguindo a Resolução COFEN nº 543/2017.</p>
-                        <div class="bg-white p-6 rounded-lg shadow-lg"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div><h3 class="font-bold text-xl text-[#003366] mb-4">1. Insira o número de pacientes</h3><div class="space-y-4"><div><label for="cuidado-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Intensivo (Sala Vermelha)</label><p class="text-xs italic text-gray-500">Paciente grave, com risco iminente de morte, exigindo cuidado contínuo.</p><input type="number" id="cuidado-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="2"></div><div><label for="cuidado-semi-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Semi-Intensivo</label><p class="text-xs italic text-gray-500">Paciente com risco de instabilidade, necessitando de monitoramento e cuidados complexos.</p><input type="number" id="cuidado-semi-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="4"></div><div><label for="cuidado-intermediario" class="block text-sm font-medium text-gray-700">Cuidado Intermediário</label><p class="text-xs italic text-gray-500">Paciente estável que requer cuidados, mas sem risco iminente. Ex: Pós-operatório em observação.</p><input type="number" id="cuidado-intermediario" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="10"></div><div><label for="cuidado-minimo" class="block text-sm font-medium text-gray-700">Cuidado Mínimo</label><p class="text-xs italic text-gray-500">Paciente estável, autossuficiente. Ex: Medicação oral, curativos simples.</p><input type="number" id="cuidado-minimo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="0"></div></div></div><div><h3 class="font-bold text-xl text-[#003366] mb-4">2. Resultados do Dimensionamento</h3><div class="bg-blue-50 p-4 rounded-lg space-y-3"><div><p class="text-sm text-gray-600">Total de Horas de Enfermagem (THE) / 24h:</p><p id="the-result" class="text-2xl font-bold text-[#003366]">0</p></div><div><p class="text-sm text-gray-600">Total de Profissionais (24h):</p><p id="total-staff-result" class="text-2xl font-bold text-[#003366]">0</p></div></div><div class="mt-4"><h3 class="font-bold text-lg text-[#003366] mb-2">Distribuição da Equipe (Recomendada)</h3><div class="chart-container"><canvas id="staffing-chart"></canvas></div></div></div></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">1. Insira o número de pacientes</h3><div class="space-y-4"><div><label for="cuidado-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Intensivo (Sala Vermelha)</label><p class="text-xs italic text-gray-500">Paciente grave, com risco iminente de morte, exigindo cuidado contínuo.</p><input type="number" id="cuidado-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="2"></div><div><label for="cuidado-semi-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Semi-Intensivo</label><p class="text-xs italic text-gray-500">Paciente com risco de instabilidade, necessitando de monitoramento e cuidados complexos.</p><input type="number" id="cuidado-semi-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="4"></div><div><label for="cuidado-intermediario" class="block text-sm font-medium text-gray-700">Cuidado Intermediário</label><p class="text-xs italic text-gray-500">Paciente estável que requer cuidados, mas sem risco iminente. Ex: Pós-operatório em observação.</p><input type="number" id="cuidado-intermediario" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="10"></div><div><label for="cuidado-minimo" class="block text-sm font-medium text-gray-700">Cuidado Mínimo</label><p class="text-xs italic text-gray-500">Paciente estável, autossuficiente. Ex: Medicação oral, curativos simples.</p><input type="number" id="cuidado-minimo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="0"></div></div></div><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">2. Resultados do Dimensionamento</h3><div class="bg-teal-50 p-4 rounded-lg space-y-3"><div><p class="text-sm text-gray-600">Total de Horas de Enfermagem (THE) / 24h:</p><p id="the-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div><div><p class="text-sm text-gray-600">Total de Profissionais (24h):</p><p id="total-staff-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div></div><div class="mt-4"><h3 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Distribuição da Equipe (Recomendada)</h3><div class="chart-container"><canvas id="staffing-chart"></canvas></div></div></div></div></div>
                      </div>
                 `,
                 'processos': `
-                    <h2 class="section-title text-3xl font-bold text-center mb-2">A Jornada do Paciente: Processos Mandatórios</h2>
-                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Processos bem definidos são a espinha dorsal de um atendimento seguro e eficaz. Clique em cada etapa para explorar os detalhes do fluxo, exemplos práticos e referências.</p>
-                    <div class="space-y-4" id="process-accordion"></div>
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Processos, Riscos e Melhoria Contínua</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Processos bem definidos, aliados a uma robusta gestão de riscos e à ciência da melhoria, são a espinha dorsal de um atendimento seguro e eficaz.</p>
+                    <div id="process-accordion"></div>
                 `,
                 'comissoes': `
                     <h2 class="section-title text-3xl font-bold text-center mb-2">Comissões Obrigatórias e Governança Clínica</h2>
                     <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A segurança e a qualidade do cuidado são sustentadas por comissões obrigatórias que supervisionam processos críticos na unidade.</p>
-                    <div class="mb-8"><h3 class="text-2xl font-semibold text-gray-800 mb-4">Comissões Fundamentais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[#003366] mb-3">NSP - Núcleo de Segurança do Paciente</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Promove a cultura de segurança e implementa protocolos para prevenir danos aos pacientes.</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: ANVISA RDC nº 36/2013</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[#003366] mb-3">CCIH - Comissão de Controle de Infecção Hospitalar</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Desenvolve ações para prevenir e controlar infecções relacionadas à assistência à saúde (IRAS).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Portaria MS nº 2.616/1998</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[#003366] mb-3">CIPA - Comissão Interna de Prevenção de Acidentes</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Focada na segurança dos trabalhadores. Obrigatória a partir de 20 funcionários (Grau de Risco 3).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Norma Regulamentadora nº 5 (NR-5)</p></div></div></div>
-                    <div><h3 class="text-2xl font-semibold text-gray-800 mb-4">Outras Comissões de Governança Essenciais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Ética Médica (CEM)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Fiscaliza o exercício ético da medicina dentro da instituição, atuando como um braço do CRM.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.152/2016</p></div><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Ética de Enfermagem (CEE)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Zela pelo cumprimento do código de ética da enfermagem e orienta a equipe sobre práticas adequadas.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução COFEN n° 593/2018</p></div><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Revisão de Prontuários</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Avalia a qualidade dos registros nos prontuários, garantindo que sejam completos, legíveis e adequados legalmente.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 1.638/2002</p></div><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Revisão de Óbitos</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Analisa os óbitos ocorridos na unidade para identificar oportunidades de melhoria no processo assistencial.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.171/2017</p></div><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Farmácia e Terapêutica (CFT)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Seleciona os medicamentos que farão parte do arsenal da unidade, com base em eficácia, segurança e custo.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Portaria MS n° 4.217/2010</p></div><div class="card bg-gray-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[#003366] mb-2">Comissão de Gerenciamento de Resíduos (CGRSS)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Elabora e supervisiona o Plano de Gerenciamento de Resíduos de Serviços de Saúde (PGRSS).</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: ANVISA RDC n° 222/2018</p></div></div></div>
+                    <div class="mb-8"><h3 class="text-2xl font-semibold text-gray-800 mb-4">Comissões Fundamentais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">NSP - Núcleo de Segurança do Paciente</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Promove a cultura de segurança e implementa protocolos para prevenir danos aos pacientes.</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: ANVISA RDC nº 36/2013</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CCIH - Comissão de Controle de Infecção Hospitalar</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Desenvolve ações para prevenir e controlar infecções relacionadas à assistência à saúde (IRAS).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Portaria MS nº 2.616/1998</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CIPA - Comissão Interna de Prevenção de Acidentes</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Focada na segurança dos trabalhadores. Obrigatória a partir de 20 funcionários (Grau de Risco 3).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Norma Regulamentadora nº 5 (NR-5)</p></div></div></div>
+                    <div><h3 class="text-2xl font-semibold text-gray-800 mb-4">Outras Comissões de Governança Essenciais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Ética Médica (CEM)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Fiscaliza o exercício ético da medicina dentro da instituição, atuando como um braço do CRM.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.152/2016</p></div><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Ética de Enfermagem (CEE)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Zela pelo cumprimento do código de ética da enfermagem e orienta a equipe sobre práticas adequadas.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução COFEN n° 593/2018</p></div><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Revisão de Prontuários</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Avalia a qualidade dos registros nos prontuários, garantindo que sejam completos, legíveis e adequados legalmente.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 1.638/2002</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Revisão de Óbitos</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Analisa os óbitos ocorridos na unidade para identificar oportunidades de melhoria no processo assistencial.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.171/2017</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Farmácia e Terapêutica (CFT)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Seleciona os medicamentos que farão parte do arsenal da unidade, com base em eficácia, segurança e custo.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Portaria MS n° 4.217/2010</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Gerenciamento de Resíduos (CGRSS)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Elabora e supervisiona o Plano de Gerenciamento de Resíduos de Serviços de Saúde (PGRSS).</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: ANVISA RDC n° 222/2018</p></div></div></div>
                 `,
-                 'indicadores': `
-                    <h2 class="section-title text-3xl font-bold text-center mb-2">Indicadores Gerenciados de Emergência</h2>
-                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A gestão de uma unidade de emergência de alta performance depende do monitoramento de KPIs. As metas são baseadas em referências de acreditação como ONA e JCI.</p>
+                'indicadores': `
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Dashboard de Indicadores de Emergência</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A gestão de alta performance depende do monitoramento de um conjunto balanceado de indicadores. A abordagem de Donabedian (Estrutura, Processo, Resultado) oferece uma visão completa da qualidade.</p>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                        <h3 class="text-xl font-bold text-center text-[--primary-dark-blue] mb-4">Por que Definir e Gerenciar Indicadores na Emergência?</h3>
+                        <p class="text-gray-700 text-center max-w-4xl mx-auto">No ambiente dinâmico e de alta pressão de uma emergência, operar "no escuro" não é uma opção. Indicadores transformam dados brutos em informações estratégicas, permitindo que as lideranças e equipes:
+                        <ul class="flex flex-wrap justify-center gap-4 mt-4 text-sm">
+                            <li class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full">Tomem Decisões Baseadas em Evidências</li>
+                            <li class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full">Identifiquem Gargalos e Oportunidades</li>
+                            <li class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full">Monitorem a Performance em Tempo Real</li>
+                            <li class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full">Promovam a Melhoria Contínua</li>
+                            <li class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full">Aumentem a Segurança do Paciente</li>
+                        </ul>
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                        <h3 class="text-xl font-bold text-center text-[--primary-dark-blue] mb-4">Entendendo os Tipos de Indicadores</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div>
+                                <div class="bg-blue-100 text-blue-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 font-bold text-2xl">E</div>
+                                <h4 class="font-bold text-lg mb-1">Estrutura</h4>
+                                <p class="text-sm text-gray-600">Mede os recursos disponíveis. Responde a: "Temos as ferramentas e a equipe certas?". Inclui instalações, equipamentos e qualificações da equipe.</p>
+                            </div>
+                            <div>
+                                <div class="bg-yellow-100 text-yellow-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 font-bold text-2xl">P</div>
+                                <h4 class="font-bold text-lg mb-1">Processo</h4>
+                                <p class="text-sm text-gray-600">Mede as ações e a conformidade. Responde a: "Estamos fazendo as coisas certas?". Inclui adesão a protocolos e tempos de atendimento.</p>
+                            </div>
+                            <div>
+                                <div class="bg-green-100 text-green-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 font-bold text-2xl">R</div>
+                                <h4 class="font-bold text-lg mb-1">Resultado</h4>
+                                <p class="text-sm text-gray-600">Mede o impacto no paciente. Responde a: "Qual foi o efeito do nosso cuidado?". Inclui desfechos clínicos, satisfação e eficiência.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="space-y-8">
-                        <div><h3 class="text-2xl font-semibold text-gray-800 mb-4">Indicadores de Fluxo e Tempo</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo de Classificação</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até o fim da classificação de risco.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Fim Classif.) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 95%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 10 min</p></div><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo Porta-Médico</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até o primeiro atendimento médico.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Atend. Médico) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 80%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 60 min (Amarelo)</p></div><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo de Permanência (LOS)</h4><p class="text-xs text-gray-500 mb-2">Tempo total do paciente na unidade (não internados).</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Saída) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 90%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 4 horas</p></div><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Taxa de Evasão</h4><p class="text-xs text-gray-500 mb-2">% de pacientes que saem antes do atendimento.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº Evasões / Nº Atend.) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 98%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 2%</p></div></div></div>
-                        <div><h3 class="text-2xl font-semibold text-gray-800 mb-4">Indicadores de Processos Clínicos</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo Porta-ECG</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até a realização do eletrocardiograma em dor torácica.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora ECG) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 96%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 10 min</p></div><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo Porta-TC</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até a tomografia de crânio em suspeita de AVC.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora TC) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 92%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 25 min</p></div><div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[#003366]">Tempo para Antibiótico na Sepse</h4><p class="text-xs text-gray-500 mb-2">Tempo do diagnóstico de sepse até a primeira dose de antibiótico.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora ATB) - (Hora Diag.)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 94%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: &lt; 1 hora</p></div></div></div>
-                        <div><h3 class="text-2xl font-semib
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Indicadores de Estrutura</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Qualificação da Equipe</h4><p class="text-xs text-gray-500 mb-2">% de enfermeiros com pós-graduação em urgência/emergência ou terapia intensiva.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de enfermeiros com pós / Nº total de enfermeiros) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 85%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 80%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Taxa de Turnover</h4><p class="text-xs text-gray-500 mb-2">Rotatividade de profissionais da equipe assistencial no último ano.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de saídas / Nº médio de funcionários) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 95%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 5%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Taxa de Absenteísmo</h4><p class="text-xs text-gray-500 mb-2">Percentual de horas de ausência não planejadas em relação ao total de horas.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Horas de ausência / Total de horas planejadas) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 97%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 3%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Disponibilidade de Equipamentos</h4><p class="text-xs text-gray-500 mb-2">% de conformidade no checklist diário de equipamentos críticos.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de checklists conformes / Nº total) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 100%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: 100%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Taxa de Ocupação</h4><p class="text-xs text-gray-500 mb-2">Percentual de leitos de observação ocupados na média diária.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de pacientes-dia / Nº de leitos-dia) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 88%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 90%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Checklist Carro de Emergência</h4><p class="text-xs text-gray-500 mb-2">% de conformidade na checagem diária de medicamentos e materiais.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de checklists conformes / Nº total) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 100%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: 100%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Manutenção Preventiva</h4><p class="text-xs text-gray-500 mb-2">Percentual de equipamentos críticos com manutenção preventiva em dia.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº eq. com MP / Nº total de eq.) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 98%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 95%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Relação Paciente/Profissional</h4><p class="text-xs text-gray-500 mb-2">Número de pacientes por profissional de enfermagem na Sala de Observação.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: Nº de pacientes / Nº de prof. de enfermagem</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-teal-500 h-2.5 rounded-full" style="width: 90%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: ≤ 6:1</p></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Indicadores de Processo</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Tempo de Classificação</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até o fim da classificação de risco.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Fim Classif.) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 95%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 10 min</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Tempo Porta-Médico</h4><p class="text-xs text-gray-500 mb-2">Tempo da chegada até o primeiro atendimento médico (pacientes amarelos).</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Atend. Médico) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 80%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 60 min</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Adesão a Treinamentos</h4><p class="text-xs text-gray-500 mb-2">% da equipe que concluiu os treinamentos obrigatórios anuais (ex: RCP).</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de treinados / Nº de elegíveis) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 92%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 90%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Adesão ao Protocolo de Sepse</h4><p class="text-xs text-gray-500 mb-2">% de pacientes com sepse que receberam o pacote completo da 1ª hora.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de pac. com pacote / Nº total de pac. com sepse) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 85%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 80%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Tempo Porta-ECG</h4><p class="text-xs text-gray-500 mb-2">Tempo entre a chegada do paciente com dor torácica e a realização do ECG.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora do ECG) - (Hora da Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 96%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 10 min</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Tempo Porta-Agulha</h4><p class="text-xs text-gray-500 mb-2">Tempo para início da trombólise em pacientes com AVCi elegíveis.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Hora Início Trombólise) - (Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 89%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 60 min</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Reavaliação da Dor</h4><p class="text-xs text-gray-500 mb-2">% de pacientes com dor > 7 que foram reavaliados em até 1h após analgesia.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de reavaliados no tempo / Nº de pac. com dor > 7) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 94%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 90%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Completude da Alta</h4><p class="text-xs text-gray-500 mb-2">% de prontuários com orientações de alta completas e legíveis.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de altas completas / Nº total de altas) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 99%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 98%</p></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Indicadores de Resultado</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Tempo de Permanência (LOS)</h4><p class="text-xs text-gray-500 mb-2">Tempo total do paciente na unidade (casos de baixa complexidade).</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Data/Hora Saída) - (Data/Hora Chegada)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 90%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 4 horas</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Satisfação do Paciente</h4><p class="text-xs text-gray-500 mb-2">Nota média em pesquisa de satisfação (ex: NPS) ou % de respostas "bom/ótimo".</p><p class="text-xs italic text-gray-500 mb-2">Fórmula NPS: (% Promotores) - (% Detratores)</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 93%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: > 90%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Taxa de Evasão</h4><p class="text-xs text-gray-500 mb-2">% de pacientes que saem antes do atendimento médico.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de evasões / Nº total de atendimentos) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 98%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 2%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Taxa de Mortalidade</h4><p class="text-xs text-gray-500 mb-2">Taxa de mortalidade na Sala Vermelha (ajustada por gravidade).</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de óbitos / Nº de admitidos) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 95%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: Conforme benchmark</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Readmissão em 72h</h4><p class="text-xs text-gray-500 mb-2">Taxa de retorno não planejado ao serviço pela mesma queixa.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de readmissões / Nº total de altas) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 99%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: < 1%</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Infecção Associada (IPCS)</h4><p class="text-xs text-gray-500 mb-2">Taxa de infecção primária de corrente sanguínea associada a cateter central.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de IPCS / Nº de cateter-dia) x 1000</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 100%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: Zero</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Eventos Adversos</h4><p class="text-xs text-gray-500 mb-2">Número de eventos adversos graves (ex: quedas) por 1.000 pacientes-dia.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de eventos / Nº de pac.-dia) x 1000</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 100%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: Zero</p></div>
+                                <div class="card bg-white p-4 rounded-lg shadow"><h4 class="font-bold text-[--primary-dark-blue]">Sobrevida Pós-PCR</h4><p class="text-xs text-gray-500 mb-2">Percentual de pacientes com alta hospitalar após PCR na unidade.</p><p class="text-xs italic text-gray-500 mb-2">Fórmula: (Nº de sobreviventes / Nº total de PCR) x 100</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" style="width: 80%"></div></div><p class="text-right text-sm font-semibold mt-1">Meta: Conforme benchmark</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12 bg-teal-50 border border-teal-200 p-6 rounded-lg shadow-lg">
+                        <h3 class="section-title text-2xl font-bold mb-3">Conclusão: Foco na Geração de Valor</h3>
+                        <p class="text-gray-700">O monitoramento isolado de indicadores oferece uma visão limitada. A verdadeira gestão baseada em valor emerge da conexão entre as três categorias: uma **estrutura** robusta (equipe qualificada, equipamentos funcionais) permite a execução de **processos** eficientes e seguros (adesão a protocolos, tempos reduzidos), que, por sua vez, levam a **resultados** clínicos positivos (menor mortalidade, altas mais rápidas) e a uma melhor experiência para o paciente.</p>
+                        <p class="text-gray-700 mt-2">Ao analisar os indicadores de forma integrada, a liderança pode identificar as verdadeiras causas de problemas. Um tempo porta-médico alto (processo) pode não ser culpa da equipe, mas sim de uma estrutura deficiente (falta de salas). Uma alta taxa de mortalidade (resultado) pode derivar de falhas no processo (baixa adesão ao protocolo de sepse). Essa visão sistêmica permite investimentos mais inteligentes e ações corretivas mais eficazes, gerando valor real para o paciente e para a sustentabilidade do serviço.</p>
+                    </div>
+                `,
+                'referencias': `
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Referências Bibliográficas</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A base legal e científica para a estruturação e operação de unidades de emergência no Brasil.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Legislação e Normativas</h3><ul class="space-y-2 text-gray-700 list-disc list-inside"><li>BRASIL. Ministério da Saúde. Portaria de Consolidação nº 3, de 28 de setembro de 2017.</li><li>BRASIL. ANVISA. RDC nº 50, de 21 de fevereiro de 2002.</li><li>BRASIL. ANVISA. RDC nº 7, de 24 de fevereiro de 2010.</li><li>BRASIL. ANVISA. RDC nº 63, de 25 de novembro de 2011.</li><li>Conselho Federal de Medicina (CFM). Resolução nº 2.077/2014.</li><li>Conselho Federal de Enfermagem (COFEN). Resolução nº 543/2017.</li></ul></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Gestão, Qualidade e Indicadores</h3><ul class="space-y-2 text-gray-700 list-disc list-inside"><li>DONABEDIAN, A. The quality of care: How can it be assessed?. <em>JAMA</em>, 1988.</li>
+                        <li>CHIAVENATO, I. <em>Gestão de Pessoas: O Novo Papel dos Recursos Humanos nas Organizações</em>. 2014.</li>
+                        <li>REICHHELD, F. F. The one number you need to grow. <em>Harvard Business Review</em>, 2003.</li>
+                        <li>MARQUES, R. A.; GUIMARÃES, T. A. Rotatividade e absenteísmo da força de trabalho em enfermagem. <em>RAS</em>, 2007.</li>
+                        <li>Grupo Brasileiro de Classificação de Risco. "Protocolo de Manchester".</li>
+                        <li>"ACLS - Suporte Avançado de Vida em Cardiologia". American Heart Association.</li>
+                        <li>"Surviving Sepsis Campaign: International Guidelines".</li>
+                        <li>Institute for Healthcare Improvement (IHI). Ferramentas de Melhoria Contínua.</li></ul></div>
+                    </div>
+                `,
+                'contato': `
+                    <div class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+                        <h2 class="section-title text-3xl font-bold text-center mb-4">Fale com Nossos Especialistas</h2>
+                        <p class="text-center text-lg text-gray-600 mb-8">Transforme a qualidade e a segurança do cuidado em sua instituição com nossas consultorias, treinamentos e soluções de gestão baseadas em evidências.</p>
+                        
+                        <div class="bg-teal-50 border-l-4 border-[--primary-teal] p-6 rounded-r-lg mb-8">
+                            <h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Como Podemos Ajudar</h3>
+                            <p class="text-gray-700 mb-4">Na Educa+, nossa missão é capacitar instituições de saúde a atingirem a excelência clínica e operacional. Integramos tecnologia com metodologias de qualidade (Lean Healthcare, PDSA, outros) para gerar impacto mensurável.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Otimizar Fluxos e Processos</h4>
+                                    <p class="text-sm text-gray-600">Reduzimos desperdícios e tempos de espera, melhorando a eficiência na alocação de recursos e no fluxo de pacientes.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Fortalecer a Segurança do Paciente</h4>
+                                    <p class="text-sm text-gray-600">Implementamos sistemas para gestão de riscos, análise de eventos adversos e adesão a protocolos, alinhados às metas internacionais.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Monitorar o Desempenho com Dados</h4>
+                                    <p class="text-sm text-gray-600">Desenvolvemos KPIs de estrutura, processo e resultado que fornecem uma visão clara para a tomada de decisão estratégica.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Melhorar a Experiência do Paciente</h4>
+                                    <p class="text-sm text-gray-600">Criamos ferramentas para coletar e analisar dados de satisfação, focando no cuidado centrado no paciente.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Pronto para elevar o padrão de cuidado da sua organização?</h3>
+                            <p class="text-gray-600 mb-4">Entre em contato para agendar uma demonstração.</p>
+                            <a href="mailto:geovanamtomasella@gmail.com" class="inline-block bg-[--primary-dark-blue] text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-colors">
+                                Agende uma Demonstração
+                            </a>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <p>geovanamtomasella@gmail.com</p>
+                                <p>(12) 99123-9611</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+            
+            sections.forEach(section => {
+                const button = document.createElement('button');
+                button.className = 'tab-button text-gray-500 hover:text-[--primary-dark-blue] py-4 px-3 text-sm font-medium whitespace-nowrap flex items-center';
+                button.innerHTML = `${section.icon} <span>${section.title}</span>`;
+                button.dataset.tab = section.id;
+                tabButtonsContainer.appendChild(button);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.id = section.id;
+                contentDiv.className = 'tab-content';
+                contentDiv.innerHTML = contentHTML[section.id] + footerHTML;
+                tabContentsContainer.appendChild(contentDiv);
+            });
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            function switchTab(tabId) {
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                tabButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                const activeContent = document.getElementById(tabId)
+                if(activeContent) {
+                   activeContent.classList.remove('hidden');
+                }
+                const activeButton = document.querySelector(`[data-tab="${tabId}"]`);
+                if(activeButton) {
+                   activeButton.classList.add('active');
+                }
+                
+                // Re-initialize scripts for the now-visible tab
+                if (tabId === 'processos') initializeAccordion();
+                if (tabId === 'estrutura') initializeStructureExplorer();
+                if (tabId === 'equipes') initializeCalculator();
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    switchTab(button.dataset.tab);
+                });
+            });
+
+            function initializeAccordion() {
+                const mainContainer = document.getElementById('process-accordion');
+                if (!mainContainer || mainContainer.dataset.initialized) return;
+                mainContainer.dataset.initialized = 'true';
+                mainContainer.innerHTML = ''; // Clear previous content
+                
+                const processData = [
+                    {
+                        title: "1. Ciência da Melhoria: Estratégias e Ferramentas",
+                        details: `A melhoria contínua em saúde não acontece por acaso; ela é uma ciência. Entender seus princípios é fundamental para transformar o cuidado na emergência.
+                        <ul class="list-disc list-inside mt-4 space-y-3">
+                            <li><strong>Ambientes Complexos:</strong> Sistemas de saúde são adaptativos e imprevisíveis. Uma pequena mudança pode gerar grandes efeitos inesperados. A gestão deve ser flexível e focada em aprender com a variabilidade, não em eliminá-la.<div class="text-xs text-gray-600 p-2 bg-gray-100 rounded mt-1"><strong>Exemplo:</strong> Um surto de virose na cidade aumenta o volume de pacientes em 50% (mudança no ambiente). Isso não apenas superlota a recepção, mas atrasa o atendimento de casos graves, sobrecarrega a equipe e aumenta o risco de erros (efeitos inesperados).</div></li>
+                            <li><strong>Variabilidade do Cuidado:</strong> A performance humana varia. Em vez de buscar uma padronização rígida que ignore o contexto, o objetivo é criar processos resilientes que guiem para as melhores práticas, mas permitam adaptações seguras.<div class="text-xs text-gray-600 p-2 bg-gray-100 rounded mt-1"><strong>Exemplo:</strong> Um protocolo de sepse exige antibiótico em 60 minutos. Um paciente idoso com histórico renal complexo pode precisar de um ajuste de dose que leva mais tempo. A equipe, usando seu julgamento clínico, adapta o processo (garantindo segurança) em vez de seguir rigidamente o tempo e causar um dano renal.</div></li>
+                            <li><strong>Fatores Humanos:</strong> O design de processos e sistemas deve considerar as limitações e capacidades humanas. Isso inclui simplificar tarefas, reduzir a carga de memória e criar "barreiras" que tornem difícil fazer a coisa errada e fácil fazer a coisa certa.<div class="text-xs text-gray-600 p-2 bg-gray-100 rounded mt-1"><strong>Exemplo:</strong> Para evitar a troca de medicamentos com nomes parecidos (LASA), a farmácia armazena dopamina e dobutamina em prateleiras separadas, com etiquetas de cores diferentes e alertas visuais. Isso reduz a chance de erro por falha de atenção.</div></li>
+                            <li><strong>Psicologia da Mudança:</strong> Mudar processos envolve mudar pessoas. É crucial criar um ambiente de segurança psicológica, onde a equipe se sinta à vontade para apontar falhas e testar novas ideias sem medo de punição. O engajamento da equipe de linha de frente é o motor da melhoria.<div class="text-xs text-gray-600 p-2 bg-gray-100 rounded mt-1"><strong>Exemplo:</strong> Ao implementar um novo protocolo de higiene das mãos, a liderança, em vez de punir quem não adere, realiza reuniões abertas, discute as barreiras com a equipe (ex: falta de álcool gel em pontos chave) e celebra os "campeões da adesão", criando um movimento positivo.</div></li>
+                        </ul>`,
+                        example: `
+                        <h4 class='font-bold text-lg text-[--primary-dark-blue] mt-6 mb-3'>Ferramentas Essenciais de Melhoria</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h5 class="font-bold mb-2 text-center">PDSA (Planejar-Fazer-Estudar-Agir)</h5>
+                                <div class="flex items-center justify-center space-x-2 text-sm">
+                                    <div class="text-center"><div class="bg-blue-200 rounded-full w-16 h-16 flex items-center justify-center font-bold">P</div><p class="mt-1">Planejar</p></div>
+                                    <div class="text-2xl text-gray-400">&rarr;</div>
+                                    <div class="text-center"><div class="bg-yellow-200 rounded-full w-16 h-16 flex items-center justify-center font-bold">D</div><p class="mt-1">Fazer</p></div>
+                                    <div class="text-2xl text-gray-400">&rarr;</div>
+                                    <div class="text-center"><div class="bg-green-200 rounded-full w-16 h-16 flex items-center justify-center font-bold">S</div><p class="mt-1">Estudar</p></div>
+                                    <div class="text-2xl text-gray-400">&rarr;</div>
+                                    <div class="text-center"><div class="bg-red-200 rounded-full w-16 h-16 flex items-center justify-center font-bold">A</div><p class="mt-1">Agir</p></div>
+                                </div>
+                                <p class="text-xs mt-3">Ciclo para testar mudanças em pequena escala. Ex: "Vamos testar um novo checklist de alta em 2 pacientes hoje (P), aplicar (D), ver se funcionou (S) e decidir se vamos expandir (A)".</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h5 class="font-bold mb-2 text-center">Gráfico de Pareto (80/20)</h5>
+                                <div class="flex items-end space-x-3 h-24">
+                                    <div class="w-1/4 bg-[--primary-teal]" style="height: 80%;"></div>
+                                    <div class="w-1/4 bg-teal-400" style="height: 15%;"></div>
+                                    <div class="w-1/4 bg-teal-300" style="height: 3%;"></div>
+                                    <div class="w-1/4 bg-teal-200" style="height: 2%;"></div>
+                                </div>
+                                <p class="text-xs mt-3">Ajuda a focar nos problemas mais significativos. Ex: "80% das reclamações de tempo de espera (efeito) são causadas por 20% dos problemas (causas), como atraso na liberação de exames".</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h5 class="font-bold mb-2 text-center">5W2H</h5>
+                                <table class="text-xs w-full">
+                                    <tr><td class="font-bold w-1/4">What?</td><td>Reduzir tempo porta-médico.</td></tr>
+                                    <tr><td class="font-bold w-1/4">Why?</td><td>Melhorar desfecho e satisfação.</td></tr>
+                                    <tr><td class="font-bold w-1/4">Where?</td><td>Na sala de emergência.</td></tr>
+                                    <tr><td class="font-bold w-1/4">When?</td><td>Próximo trimestre.</td></tr>
+                                    <tr><td class="font-bold w-1/4">Who?</td><td>Equipe de enfermagem e médica.</td></tr>
+                                    <tr><td class="font-bold w-1/4">How?</td><td>Revisando o fluxo de triagem.</td></tr>
+                                    <tr><td class="font-bold w-1/4">How much?</td><td>Custo do treinamento.</td></tr>
+                                </table>
+                                <p class="text-xs mt-2">Ferramenta para criar planos de ação claros e completos.</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h5 class="font-bold mb-2 text-center">5 Porquês</h5>
+                                <div class="text-xs space-y-1">
+                                    <p><strong>Evento:</strong> Paciente recebeu medicamento errado.</p>
+                                    <p><strong>1. Por quê?</strong> O técnico pegou o frasco errado.</p>
+                                    <p><strong>2. Por quê?</strong> Os frascos eram parecidos e estavam juntos.</p>
+                                    <p><strong>3. Por quê?</strong> Não havia processo de segregação de LASA.</p>
+                                    <p class="font-bold"><strong>Causa Raiz &rarr;</strong> Falha sistêmica no processo.</p>
+                                </div>
+                                <p class="text-xs mt-2">Técnica simples para aprofundar a investigação de um problema até encontrar a causa raiz.</p>
+                            </div>
+                        </div>`,
+                        references: "<strong>Referências:</strong> The Improvement Guide (Langley et al.); Institute for Healthcare Improvement (IHI)."
+                    },
+                    {
+                        title: "2. A Jornada do Paciente: Fluxo Central",
+                        details: "A jornada do paciente na emergência é uma sequência de etapas críticas, começando pelo acolhimento e classificação de risco para determinar a prioridade, seguida pelo atendimento médico, estabilização e, finalmente, a decisão de alta ou transferência. Cada fase exige processos claros e padronizados para garantir agilidade e segurança.",
+                        example: `
+                        <p class="font-semibold text-gray-800 mb-2">Exemplo de Classificação (Protocolo de Manchester):</p><div class="overflow-x-auto mb-6"><table class="w-full text-sm text-left text-gray-500"><thead class="text-xs text-gray-700 uppercase bg-gray-100"><tr><th class="px-4 py-2">Cor</th><th class="px-4 py-2">Nível</th><th class="px-4 py-2">Tempo de Atendimento</th></tr></thead><tbody><tr class="border-b"><td class="px-4 py-2 font-medium text-red-600">Vermelho</td><td class="px-4 py-2">Emergência</td><td class="px-4 py-2">Imediato</td></tr><tr class="border-b"><td class="px-4 py-2 font-medium text-orange-500">Laranja</td><td class="px-4 py-2">Muito Urgente</td><td class="px-4 py-2">Até 10 min</td></tr><tr class="border-b"><td class="px-4 py-2 font-medium text-yellow-500">Amarelo</td><td class="px-4 py-2">Urgente</td><td class="px-4 py-2">Até 60 min</td></tr><tr class="border-b"><td class="px-4 py-2 font-medium text-green-600">Verde</td><td class="px-4 py-2">Pouco Urgente</td><td class="px-4 py-2">Até 120 min</td></tr><tr><td class="px-4 py-2 font-medium text-blue-600">Azul</td><td class="px-4 py-2">Não Urgente</td><td class="px-4 py-2">Até 240 min</td></tr></tbody></table></div>
+                        <div class="mb-4"><div class="flex border-b"><button data-tab="iam" class="protocol-tab flex-1 p-2 font-semibold text-center bg-gray-200 rounded-tl-lg active">Dor Torácica (IAM)</button><button data-tab="sepse" class="protocol-tab flex-1 p-2 font-semibold text-center bg-gray-200">Sepse</button><button data-tab="avc" class="protocol-tab flex-1 p-2 font-semibold text-center bg-gray-200">AVC</button><button data-tab="trauma" class="protocol-tab flex-1 p-2 font-semibold text-center bg-gray-200 rounded-tr-lg">Trauma</button></div>
+                        <div id="iam" class="p-4 protocol-content"><p class="font-semibold text-gray-800 mb-2">Fluxo de Dor Torácica (Suspeita de IAM)</p><div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 text-center"><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/5"><strong>Chegada</strong><p class="text-xs">Dor torácica</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/5"><strong>Meta: &lt; 10 min</strong><p class="text-xs">ECG + Atendimento</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/5"><strong>Diagnóstico</strong><p class="text-xs">Confirma IAMCSST</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-red-100 rounded-md w-full md:w-1/5"><strong class="text-red-800">Ação Crítica</strong><p class="text-xs text-red-700">Acionar Hemodinâmica. Meta porta-balão &lt; 90 min.</p></div></div></div>
+                        <div id="sepse" class="p-4 protocol-content hidden"><p class="font-semibold text-gray-800 mb-2">Fluxo de Sepse</p><div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 text-center"><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/4"><strong>Reconhecimento</strong><p class="text-xs">Sinais de infecção + Disfunção orgânica (qSOFA)</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/4"><strong>Pacote da 1ª Hora</strong><p class="text-xs">Coletar lactato e hemoculturas.</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-red-100 rounded-md w-full md:w-1/4"><strong class="text-red-800">Ação Imediata</strong><p class="text-xs text-red-700">Antibiótico de amplo espectro + Reposição volêmica (30ml/kg).</p></div></div></div>
+                        <div id="avc" class="p-4 protocol-content hidden"><p class="font-semibold text-gray-800 mb-2">Fluxo de Acidente Vascular Cerebral (AVC)</p><div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 text-center"><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/4"><strong>Reconhecimento</strong><p class="text-xs">Escala pré-hospitalar (FAST/Cincinnati). Déficit focal súbito.</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-blue-100 rounded-md w-full md:w-1/4"><strong>Meta: &lt; 25 min</strong><p class="text-xs">Realização de Tomografia de Crânio.</p></div><div class="flow-arrow text-blue-500 text-2xl font-bold mx-2"><span class="md:hidden">&darr;</span><span class="hidden md:block">&rarr;</span></div><div class="flow-step p-2 bg-red-100 rounded-md w-full md:w-1/4"><strong class="text-red-800">Decisão Terapêutica</strong><p class="text-xs text-red-700">Trombólise venosa se indicado. Meta porta-agulha &lt; 60 min.</p></div></div></div>
+                        <div id="trauma" class="p-4 protocol-content hidden"><p class="font-semibold text-gray-800 mb-2">Fluxo de Trauma (Abordagem XABCDE)</p><div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-center"><div class="p-2 bg-orange-100 rounded-lg border border-orange-300"><strong class="text-lg text-orange-700">X - Hemorragia Exsanguinante</strong><p class="text-xs mt-1">Controle imediato de grandes hemorragias externas. Use torniquetes, preenchimento de feridas ou compressão direta.</p></div><div class="p-2 bg-blue-100 rounded-lg border border-blue-300"><strong class="text-lg text-blue-700">A - Vias Aéreas</strong><p class="text-xs mt-1">Verificar se a via aérea está aberta e desobstruída, com controle da coluna cervical para prevenir lesão medular.</p></div><div class="p-2 bg-blue-100 rounded-lg border border-blue-300"><strong class="text-lg text-blue-700">B - Respiração</strong><p class="text-xs mt-1">Avaliar a frequência e qualidade da respiração. Fornecer oxigênio e tratar lesões torácicas que ameacem a vida.</p></div><div class="p-2 bg-blue-100 rounded-lg border border-blue-300"><strong class="text-lg text-blue-700">C - Circulação</strong><p class="text-xs mt-1">Avaliar pulso, perfusão e cor da pele. Obter acesso venoso e iniciar reposição volêmica se houver sinais de choque.</p></div><div class="p-2 bg-blue-100 rounded-lg border border-blue-300"><strong class="text-lg text-blue-700">D - Disfunção Neurológica</strong><p class="text-xs mt-1">Avaliar o nível de consciência usando a Escala de Coma de Glasgow e verificar a resposta das pupilas.</p></div><div class="p-2 bg-blue-100 rounded-lg border border-blue-300"><strong class="text-lg text-blue-700">E - Exposição</strong><p class="text-xs mt-1">Despir completamente o paciente para procurar lesões ocultas, enquanto previne a hipotermia.</p></div></div></div></div>`,
+                        references: "<strong>Referências:</strong> Protocolo de Manchester, PHTLS, ATLS, HumanizaSUS."
+                    },
+                    {
+                        title: "3. Como Mapear Processos",
+                        details: `Visualizar o fluxo de trabalho é o primeiro passo para entendê-lo, padronizá-lo e melhorá-lo. Ferramentas como o SIPOC e o Fluxograma ajudam a traduzir atividades complexas em diagramas claros e objetivos.`,
+                        example: `<h4 class='font-bold text-lg text-[--primary-dark-blue] mb-2'>Visão Macro com SIPOC</h4>
+                        <p class="text-sm text-gray-600 mb-2">O SIPOC oferece uma visão de alto nível, ideal para entender as fronteiras do processo: quem são os fornecedores, quais as entradas, quais as saídas e quem são os clientes.</p>
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-xs text-gray-700 uppercase"><tr><th class="px-4 py-3">Fornecedores (S)</th><th class="px-4 py-3">Entradas (I)</th><th class="px-4 py-3">Processo (P)</th><th class="px-4 py-3">Saídas (O)</th><th class="px-4 py-3">Clientes (C)</th></tr></thead><tbody class="divide-y"><tr class="bg-white">
+                        <td class="px-4 py-2 align-top"><ul><li>Paciente/Família</li><li>SAMU</li><li>Enfermagem (Triagem)</li></ul></td>
+                        <td class="px-4 py-2 align-top"><ul><li>Paciente com dor</li><li>Informações iniciais</li><li><strong>Classificação de Risco</strong></li></ul></td>
+                        <td class="px-4 py-2 align-top"><ul><li>1. Realizar ECG em até 10 min</li><li>2. Atendimento médico focado</li><li>3. Coletar exames (lab/imagem)</li><li>4. Administrar medicações</li><li>5. Acionar especialista</li></ul></td>
+                        <td class="px-4 py-2 align-top"><ul><li>Diagnóstico definido</li><li>Plano terapêutico</li><li>Paciente estabilizado</li><li>Transferência/Alta</li></ul></td>
+                        <td class="px-4 py-2 align-top"><ul><li>Paciente/Família</li><li>Cardiologista</li><li>UTI/Hemodinâmica</li><li>Atenção Primária</li></ul></td>
+                        </tr></tbody></table></div>
+                        <h4 class='font-bold text-lg text-[--primary-dark-blue] mt-6 mb-2'>Visão Detalhada com Fluxograma</h4>
+                        <p class="text-sm text-gray-600 mb-2">O fluxograma detalha o passo a passo de um processo, incluindo pontos de decisão e diferentes caminhos, sendo excelente para identificar gargalos e atividades que não agregam valor.</p>
+                        <div class="text-center p-4 border rounded-lg">
+                            <div class="p-2 bg-green-200 rounded-md w-1/2 mx-auto">Início: Paciente chega com dor torácica</div>
+                            <div class="text-2xl text-gray-400 my-1">&darr;</div>
+                            <div class="p-2 bg-blue-200 rounded-md w-1/2 mx-auto">Classificação de Risco</div>
+                            <div class="text-2xl text-gray-400 my-1">&darr;</div>
+                            <div class="p-2 bg-yellow-200 w-1/2 mx-auto" style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);">ECG < 10 min?</div>
+                            <div class="flex justify-center my-1"><div class="text-2xl text-gray-400">&darr; <span class="text-xs">Sim</span></div></div>
+                            <div class="p-2 bg-blue-200 rounded-md w-1/2 mx-auto">Atendimento Médico</div>
+                            <div class="text-2xl text-gray-400 my-1">&darr;</div>
+                             <div class="p-2 bg-green-200 rounded-md w-1/2 mx-auto">Fim</div>
+                        </div>
+                        `,
+                        references: "<strong>Referências:</strong> Manuais de Gestão da Qualidade; Ferramentas da Qualidade."
+                    },
+                     {
+                        title: "4. Acordos de Nível de Serviço (SLA) com Áreas de Apoio",
+                        details: `O fluxo da emergência depende criticamente da agilidade das áreas de apoio, como laboratório e radiologia. Estabelecer Acordos de Nível de Serviço (SLAs) é essencial para formalizar as expectativas de tempo e qualidade, garantindo que o diagnóstico e o tratamento não sejam atrasados por gargalos externos.`,
+                        example: `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg border">
+                                <h5 class="font-bold text-[--primary-dark-blue] mb-2 text-center">SLA Exemplo: Serviço de Laboratório Clínico</h5>
+                                <table class="text-xs w-full">
+                                    <thead class="font-bold"><tr><td class="py-1">Métrica</td><td class="text-right">Meta (Pac. Vermelho/Laranja)</td></tr></thead>
+                                    <tbody class="divide-y">
+                                        <tr><td class="py-1">Tempo de Coleta (pós-solicitação)</td><td class="text-right">&le; 15 min</td></tr>
+                                        <tr><td class="py-1">Tempo de Liberação de Gasometria</td><td class="text-right">&le; 20 min</td></tr>
+                                        <tr><td class="py-1">Tempo de Liberação de Troponina</td><td class="text-right">&le; 60 min</td></tr>
+                                        <tr><td class="py-1">Taxa de Reconsolidação de Amostras</td><td class="text-right">&lt; 1%</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg border">
+                                <h5 class="font-bold text-[--primary-dark-blue] mb-2 text-center">SLA Exemplo: Serviço de Radiologia</h5>
+                                <table class="text-xs w-full">
+                                    <thead class="font-bold"><tr><td class="py-1">Métrica</td><td class="text-right">Meta (Pac. Vermelho/Laranja)</td></tr></thead>
+                                    <tbody class="divide-y">
+                                        <tr><td class="py-1">Tempo para Realização de Raio-X de Tórax</td><td class="text-right">&le; 30 min</td></tr>
+                                        <tr><td class="py-1">Tempo para Realização de Tomografia de Crânio</td><td class="text-right">&le; 45 min</td></tr>
+                                        <tr><td class="py-1">Tempo de Liberação do Laudo de TC</td><td class="text-right">&le; 90 min</td></tr>
+                                        <tr><td class="py-1">Taxa de Rejeição/Repetição de Exames</td><td class="text-right">&lt; 2%</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>`,
+                        references: "<strong>Referências:</strong> Manuais de Acreditação Hospitalar; ITIL Framework for Service Management."
+                    },
+                    {
+                        title: "5. Como Mapear Riscos",
+                        details: `A gestão de riscos é dividida em duas abordagens complementares: proativa e reativa. A abordagem proativa busca identificar e corrigir falhas antes que causem dano, enquanto a reativa aprende com os erros que já ocorreram para evitar que se repitam.`,
+                        example: `<h4 class='font-bold text-lg text-[--primary-dark-blue] mb-2'>Mapeamento Proativo de Riscos (FMEA)</h4>
+                        <p class="text-sm text-gray-600 mb-2">A FMEA (Análise de Modos de Falha e seus Efeitos) é usada para identificar e prevenir falhas potenciais <strong>antes</strong> que elas aconteçam.</p>
+                        <div class="overflow-x-auto"><table class="w-full text-sm border-collapse fmea-table">
+                            <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
+                                <tr><th>Modo de Falha</th><th>Efeito da Falha</th><th>Causa da Falha</th><th>Controles Atuais</th><th>O</th><th>G</th><th>D</th><th>RPN</th><th>Ações Recomendadas</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white">
+                                    <td>Erro na dosagem</td>
+                                    <td>Reação adversa grave, óbito</td>
+                                    <td>Cálculo incorreto; Prescrição ilegível</td>
+                                    <td>Checagem simples</td>
+                                    <td class="text-center">3</td><td class="text-center">10</td><td class="text-center">5</td>
+                                    <td class="text-center font-bold">150</td>
+                                    <td>Implementar dupla checagem; Usar prescrição eletrônica com alertas de dose.</td>
+                                </tr>
+                            </tbody>
+                        </table></div>
+                        <p class="text-xs text-gray-600 mt-2 mb-6"><strong>Legenda:</strong> O (Ocorrência), G (Gravidade), D (Detecção), RPN (Número de Prioridade de Risco).</p>
+                        <h4 class='font-bold text-lg text-[--primary-dark-blue] mb-2'>Mapeamento Reativo de Riscos (Ishikawa)</h4>
+                        <p class="text-sm text-gray-600 mb-2">Quando um evento adverso ocorre, a Análise de Causa Raiz (RCA) é usada para investigar. O Diagrama de Ishikawa (Espinha de Peixe) ajuda a organizar as possíveis causas do problema em categorias.</p>
+                        <div class="relative p-4">
+                            <div class="flex items-center justify-center h-full">
+                                <div class="w-full h-0.5 bg-gray-700"></div>
+                                <div class="absolute right-0 top-1/2 -translate-y-1/2 bg-white px-2 font-bold text-red-600">Atraso na ATB</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-8 text-xs mt-2">
+                                <div class="space-y-4">
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Mão de Obra:</strong> Falta de treinamento, sobrecarga da equipe, falha na comunicação.</div>
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Método:</strong> Protocolo de sepse não claro, processo de prescrição lento.</div>
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Material:</strong> Falta do antibiótico na farmácia satélite, dificuldade de acesso a kits.</div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Máquina:</strong> Sistema de prescrição eletrônica lento, impressora com defeito.</div>
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Meio Ambiente:</strong> Setor superlotado, interrupções constantes.</div>
+                                    <div class="ishikawa-bone pl-10 pt-2"><strong>Medida:</strong> Falha na identificação precoce dos sinais de sepse.</div>
+                                </div>
+                            </div>
+                        </div>`,
+                        references: "<strong>Referências:</strong> Manuais de Acreditação; The Patient Safety Handbook."
+                    },
+                     {
+                        title: "6. Políticas e Protocolos Mínimos",
+                        details: `Para garantir a padronização, a segurança e a eficiência do cuidado, toda unidade de emergência deve desenvolver, implementar e treinar suas equipes em um conjunto essencial de políticas e protocolos gerenciados. Eles servem como um guia para a tomada de decisão rápida e baseada em evidências.`,
+                        example: `<h4 class="font-semibold text-gray-800 mb-3">Checklist de Documentos Essenciais:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                            <div>
+                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos Clínicos Tempo-Sensíveis</h5>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Protocolo de Dor Torácica (IAM)</li>
+                                    <li>Protocolo de Acidente Vascular Cerebral (AVC)</li>
+                                    <li>Protocolo de Sepse</li>
+                                    <li>Protocolo de Atendimento ao Trauma</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Segurança do Paciente</h5>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Identificação Segura do Paciente</li>
+                                    <li>Prevenção de Quedas</li>
+                                    <li>Prevenção de Lesão por Pressão</li>
+                                    <li>Uso Seguro de Medicamentos (ênfase em alta vigilância)</li>
+                                    <li>Cirurgia Segura (se aplicável a procedimentos)</li>
+                                    <li>Higienização das Mãos</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Políticas Organizacionais e de Fluxo</h5>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Política de Classificação de Risco</li>
+                                    <li>Política de Admissão, Transferência e Alta</li>
+                                    <li>Plano de Atendimento a Catástrofes</li>
+                                    <li>Política de Gerenciamento de Conflitos e Comportamento Disruptivo</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Enfermagem</h5>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Punção Venosa Periférica</li>
+                                    <li>Sondagem Vesical</li>
+                                    <li>Administração de Medicamentos</li>
+                                </ul>
+                            </div>
+                        </div>
+                        `,
+                        references: "<strong>Referências:</strong> Manuais de Acreditação (ONA, Qmentum, JCI); Diretrizes do Ministério da Saúde e Conselhos de Classe."
+                    }
+                ];
+                
+                mainContainer.innerHTML += processData.map(item => `
+                    <div class="card bg-white rounded-lg shadow-lg overflow-hidden mb-4">
+                        <h2>
+                            <button type="button" class="accordion-button flex items-center justify-between w-full p-6 font-bold text-left text-xl text-[--primary-dark-blue] hover:bg-teal-50" aria-expanded="false">
+                                <span>${item.title}</span>
+                                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                        </h2>
+                        <div class="accordion-content">
+                            <div class="p-6 border-t border-gray-200">
+                                <div class="text-gray-700 mb-4">${item.details}</div>
+                                <div class="bg-slate-50 p-4 rounded-md mb-4">${item.example}</div>
+                                <p class="text-sm text-gray-600">${item.references}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                mainContainer.addEventListener('click', function(event) {
+                    const button = event.target.closest('.accordion-button');
+                    if (button) {
+                        const allButtons = mainContainer.querySelectorAll('.accordion-button');
+                        const content = button.parentElement.nextElementSibling;
+                        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+                        // Fecha todos os outros, exceto o que foi clicado
+                        allButtons.forEach(otherButton => {
+                            if (otherButton !== button) {
+                                otherButton.setAttribute('aria-expanded', 'false');
+                                otherButton.parentElement.nextElementSibling.style.maxHeight = '0';
+                            }
+                        });
+                        
+                        // Abre ou fecha o item clicado
+                        button.setAttribute('aria-expanded', !isExpanded);
+                        if (!isExpanded) {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        } else {
+                            content.style.maxHeight = "0";
+                        }
+                    }
+                    
+                    const tabButton = event.target.closest('.protocol-tab');
+                    if (tabButton) {
+                        const tabContainer = tabButton.parentElement;
+                        const contentContainer = tabButton.closest('.accordion-content');
+                        
+                        tabContainer.querySelectorAll('.protocol-tab').forEach(tab => tab.classList.remove('active'));
+                        tabButton.classList.add('active');
+                        
+                        contentContainer.querySelectorAll('.protocol-content').forEach(content => {
+                            if (content.id === tabButton.dataset.tab) {
+                                content.classList.remove('hidden');
+                            } else {
+                                content.classList.add('hidden');
+                            }
+                        });
+                         // Reajusta o tamanho do accordion caso o conteúdo interno mude
+                        const accordionContent = tabButton.closest('.accordion-content');
+                        if (accordionContent.style.maxHeight !== '0px') {
+                            accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                        }
+                    }
+                });
+            }
+
+
+            // Explorador de Estrutura
+            function initializeStructureExplorer() {
+                 const structureData = {
+                    'Classificação de Risco': {
+                        desc: 'Local para a primeira avaliação do paciente, definindo a prioridade de atendimento.',
+                        dim: 'Área mínima: 7,5 m²',
+                        reqs: ['Bancada com pia', 'Proximidade da entrada de pacientes'],
+                        equips: ['Esfigmomanômetro', 'Termômetro', 'Oxímetro de pulso']
+                    },
+                    'Sala de Emergência (Vermelha)': {
+                        desc: 'Destinada ao atendimento de pacientes críticos com risco iminente de morte.',
+                        dim: 'Área mínima: 15 m² por leito',
+                        reqs: ['Pontos de O2, vácuo e ar comprimido', 'Iluminação de emergência', 'Piso e paredes laváveis'],
+                        equips: ['Monitor multiparâmetros', 'Ventilador mecânico', 'Desfibrilador', 'Carro de emergência']
+                    },
+                    'Leitos de Observação': {
+                        desc: 'Para pacientes que precisam de monitoramento ou aguardam transferência.',
+                        dim: 'Área mínima: 6,0 m² por leito (coletivo)',
+                        reqs: ['Ponto de oxigênio por leito', 'Distanciamento mínimo de 1m entre leitos', 'Sanitário para pacientes próximo'],
+                        equips: ['Monitor de sinais vitais', 'Bomba de infusão', 'Acesso a ECG']
+                    },
+                    'Sala de Procedimentos': {
+                        desc: 'Utilizada para procedimentos como suturas, drenagens e pequenas cirurgias.',
+                        dim: 'Área mínima: 9,0 m²',
+                        reqs: ['Bancada com pia de lavagem', 'Foco de luz cirúrgico', 'Revestimentos laváveis'],
+                        equips: ['Mesa cirúrgica auxiliar', 'Bisturi elétrico', 'Material de sutura e curativo']
+                    },
+                };
+
+                const structureGrid = document.getElementById('structure-grid');
+                if(!structureGrid) return;
+                structureGrid.innerHTML = '';
+
+                const detailsSection = document.getElementById('structure-details');
+                const detailsTitle = document.getElementById('details-title');
+                const detailsDesc = document.getElementById('details-desc');
+                const detailsDim = document.getElementById('details-dim');
+                const detailsReqs = document.getElementById('details-reqs');
+                const detailsEquips = document.getElementById('details-equips');
+
+                Object.keys(structureData).forEach(key => {
+                    const button = document.createElement('button');
+                    button.className = 'card bg-slate-100 p-4 rounded-lg text-center font-semibold text-[--primary-dark-blue] hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-500';
+                    button.textContent = key;
+                    button.addEventListener('click', () => {
+                        const data = structureData[key];
+                        detailsTitle.textContent = key;
+                        detailsDesc.textContent = data.desc;
+                        detailsDim.textContent = data.dim;
+
+                        detailsReqs.innerHTML = '';
+                        data.reqs.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            detailsReqs.appendChild(li);
+                        });
+
+                        detailsEquips.innerHTML = '';
+                        data.equips.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            detailsEquips.appendChild(li);
+                        });
+                        
+                        detailsSection.classList.remove('hidden');
+                    });
+                    structureGrid.appendChild(button);
+                });
+            }
+            
+            // Calculadora
+            function initializeCalculator() {
+                 const inputs = [
+                    document.getElementById('cuidado-intensivo'),
+                    document.getElementById('cuidado-semi-intensivo'),
+                    document.getElementById('cuidado-intermediario'),
+                    document.getElementById('cuidado-minimo')
+                ];
+                if(!inputs[0]) return;
+
+                const theResultEl = document.getElementById('the-result');
+                const totalStaffResultEl = document.getElementById('total-staff-result');
+                
+                const careHours = {
+                    intensivo: 17.9,
+                    semi: 9.4,
+                    intermediario: 5.6,
+                    minimo: 3.8
+                };
+                const dailyWorkHours = 6; 
+                let staffingChart = null;
+
+                function calculateStaffing() {
+                    const p_intensivo = parseFloat(inputs[0].value) || 0;
+                    const p_semi = parseFloat(inputs[1].value) || 0;
+                    const p_intermediario = parseFloat(inputs[2].value) || 0;
+                    const p_minimo = parseFloat(inputs[3].value) || 0;
+
+                    const totalTHE = (p_intensivo * careHours.intensivo) + (p_semi * careHours.semi) + (p_intermediario * careHours.intermediario) + (p_minimo * careHours.minimo);
+                    const totalQP = (totalTHE / dailyWorkHours) * 1.15; 
+
+                    theResultEl.textContent = totalTHE.toFixed(2);
+                    totalStaffResultEl.textContent = Math.ceil(totalQP);
+                    
+                    let nurse_pct = 0.33;
+                    if (p_intensivo > 0) nurse_pct = 0.52;
+                    else if (p_semi > 0) nurse_pct = 0.42;
+                    
+                    const totalStaff = Math.ceil(totalQP);
+                    const nurses = Math.ceil(totalStaff * nurse_pct);
+                    const techs = totalStaff - nurses;
+
+                    updateChart(nurses, techs);
+                }
+
+                function updateChart(nurses, techs) {
+                    const data = {
+                        labels: ['Enfermeiros', 'Técnicos/Auxiliares'],
+                        datasets: [{ 
+                            label: 'Nº de Profissionais', 
+                            data: [nurses, techs], 
+                            backgroundColor: ['#0A2342', '#00A79D'], 
+                            borderColor: '#f8fafc', 
+                            borderWidth: 2, 
+                            hoverOffset: 4 
+                        }]
+                    };
+
+                    if (staffingChart) {
+                        staffingChart.data = data;
+                        staffingChart.update();
+                    } else {
+                        const ctx = document.getElementById('staffing-chart').getContext('2d');
+                        if(!ctx) return;
+                        staffingChart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: data,
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}` } } } }
+                        });
+                    }
+                }
+
+                inputs.forEach(input => input.addEventListener('input', calculateStaffing));
+                calculateStaffing();
+            }
+            
+            switchTab('visao-geral'); // Initialize with the first tab
+
+        });
+    </script>
+</body>
+</html>
