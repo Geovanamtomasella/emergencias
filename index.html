@@ -69,6 +69,35 @@
         .ishikawa-bone {
             border-top: 2px solid #9ca3af;
         }
+        /* Estilos para o Quiz */
+        .quiz-question {
+            transition: background-color 0.4s ease;
+        }
+        .quiz-question.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-left-color: #10b981; /* green-500 */
+        }
+        .quiz-question.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-left-color: #ef4444; /* red-500 */
+        }
+        .quiz-feedback {
+            font-weight: 500;
+        }
+        .quiz-feedback.correct {
+            color: #047857; /* green-700 */
+        }
+        .quiz-feedback.incorrect {
+            color: #b91c1c; /* red-700 */
+        }
+        .quiz-justification {
+            background-color: #f1f5f9; /* slate-100 */
+            border-top: 2px solid #e2e8f0; /* slate-200 */
+            margin-top: 1rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #475569; /* slate-600 */
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -108,6 +137,8 @@
                 processos: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
                 comissoes: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>`,
                 indicadores: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
+                culturaSeguranca: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.491a9.004 9.004 0 01-13.236 13.236A9.004 9.004 0 0121.618 7.509z" /></svg>`,
+                quiz: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
                 referencias: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
                 contato: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`
             };
@@ -120,6 +151,8 @@
                 { id: 'processos', title: 'Processos', icon: icons.processos },
                 { id: 'comissoes', title: 'Comissões', icon: icons.comissoes },
                 { id: 'indicadores', title: 'Indicadores', icon: icons.indicadores },
+                { id: 'cultura-seguranca', title: 'Cultura de Segurança', icon: icons.culturaSeguranca },
+                { id: 'quiz', title: 'Quiz', icon: icons.quiz },
                 { id: 'referencias', title: 'Referências', icon: icons.referencias },
                 { id: 'contato', title: 'Contato', icon: icons.contato }
             ];
@@ -188,9 +221,15 @@
                         </div>
                      </div>
                      <div class="mt-12" id="calculadora">
-                        <h2 class="section-title text-3xl font-bold text-center mb-2">Calculadora de Dimensionamento de Enfermagem</h2>
-                        <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Use esta ferramenta interativa para estimar a equipe de enfermagem necessária com base na complexidade dos pacientes, seguindo a Resolução COFEN nº 543/2017.</p>
-                        <div class="bg-white p-6 rounded-lg shadow-lg"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">1. Insira o número de pacientes</h3><div class="space-y-4"><div><label for="cuidado-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Intensivo (Sala Vermelha)</label><p class="text-xs italic text-gray-500">Paciente grave, com risco iminente de morte, exigindo cuidado contínuo.</p><input type="number" id="cuidado-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="2"></div><div><label for="cuidado-semi-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Semi-Intensivo</label><p class="text-xs italic text-gray-500">Paciente com risco de instabilidade, necessitando de monitoramento e cuidados complexos.</p><input type="number" id="cuidado-semi-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="4"></div><div><label for="cuidado-intermediario" class="block text-sm font-medium text-gray-700">Cuidado Intermediário</label><p class="text-xs italic text-gray-500">Paciente estável que requer cuidados, mas sem risco iminente. Ex: Pós-operatório em observação.</p><input type="number" id="cuidado-intermediario" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="10"></div><div><label for="cuidado-minimo" class="block text-sm font-medium text-gray-700">Cuidado Mínimo</label><p class="text-xs italic text-gray-500">Paciente estável, autossuficiente. Ex: Medicação oral, curativos simples.</p><input type="number" id="cuidado-minimo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="0"></div></div></div><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">2. Resultados do Dimensionamento</h3><div class="bg-teal-50 p-4 rounded-lg space-y-3"><div><p class="text-sm text-gray-600">Total de Horas de Enfermagem (THE) / 24h:</p><p id="the-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div><div><p class="text-sm text-gray-600">Total de Profissionais (24h):</p><p id="total-staff-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div></div><div class="mt-4"><h3 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Distribuição da Equipe (Recomendada)</h3><div class="chart-container"><canvas id="staffing-chart"></canvas></div></div></div></div></div>
+                        <h2 class="section-title text-3xl font-bold text-center mb-2">Calculadora de Dimensionamento de Enfermagem (COFEN Nº 743/2024)</h2>
+                        <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Use esta ferramenta para estimar a equipe de enfermagem necessária com base na complexidade dos pacientes, seguindo a Resolução COFEN nº 743/2024 e o Parecer Normativo nº 1/2024/COFEN.</p>
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">1. Insira o número de pacientes por nível de cuidado</h3><div class="space-y-4">
+                            <div><label for="cuidado-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Intensivo</label><p class="text-xs italic text-gray-500">Paciente grave, com risco iminente de morte, exigindo cuidado contínuo e especializado.</p><input type="number" id="cuidado-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="2"></div>
+                            <div><label for="cuidado-semi-intensivo" class="block text-sm font-medium text-gray-700">Cuidado Semi-Intensivo</label><p class="text-xs italic text-gray-500">Paciente com risco de instabilidade, necessitando de monitoramento e cuidados complexos.</p><input type="number" id="cuidado-semi-intensivo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="4"></div>
+                            <div><label for="cuidado-alta-dependencia" class="block text-sm font-medium text-gray-700">Cuidado de Alta Dependência</label><p class="text-xs italic text-gray-500">Paciente crônico estável ou em cuidados paliativos, com dependência total de cuidados.</p><input type="number" id="cuidado-alta-dependencia" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="0"></div>
+                            <div><label for="cuidado-intermediario" class="block text-sm font-medium text-gray-700">Cuidado Intermediário</label><p class="text-xs italic text-gray-500">Paciente estável com dependência parcial de cuidados para suas necessidades básicas.</p><input type="number" id="cuidado-intermediario" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="10"></div>
+                            <div><label for="cuidado-minimo" class="block text-sm font-medium text-gray-700">Cuidado Mínimo</label><p class="text-xs italic text-gray-500">Paciente estável, autossuficiente. Ex: Medicação oral, curativos simples.</p><input type="number" id="cuidado-minimo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="0"></div>
+                        </div></div><div><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-4">2. Resultados do Dimensionamento</h3><div class="bg-teal-50 p-4 rounded-lg space-y-3"><div><p class="text-sm text-gray-600">Total de Horas de Enfermagem (THE) / 24h:</p><p id="the-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div><div><p class="text-sm text-gray-600">Total de Profissionais (QP) com IST de 15%:</p><p id="total-staff-result" class="text-2xl font-bold text-[--primary-dark-blue]">0</p></div></div><div class="mt-4"><h3 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Distribuição Qualitativa da Equipe</h3><div class="chart-container"><canvas id="staffing-chart"></canvas></div></div></div></div></div>
                      </div>
                 `,
                 'processos': `
@@ -289,19 +328,95 @@
                         <p class="text-gray-700 mt-2">Ao analisar os indicadores de forma integrada, a liderança pode identificar as verdadeiras causas de problemas. Um tempo porta-médico alto (processo) pode não ser culpa da equipe, mas sim de uma estrutura deficiente (falta de salas). Uma alta taxa de mortalidade (resultado) pode derivar de falhas no processo (baixa adesão ao protocolo de sepse). Essa visão sistêmica permite investimentos mais inteligentes e ações corretivas mais eficazes, gerando valor real para o paciente e para a sustentabilidade do serviço.</p>
                     </div>
                 `,
+                'cultura-seguranca': `
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Cultura de Segurança Organizacional</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A cultura de segurança é a base sobre a qual todos os processos e protocolos são construídos. É, de forma simples, "a maneira como fazemos as coisas por aqui", refletindo crenças e atitudes compartilhadas sobre segurança.</p>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                        <h3 class="text-xl font-bold text-center text-[--primary-dark-blue] mb-4">Os Pilares de uma Cultura de Segurança Positiva</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                            <div class="p-4"><div class="bg-teal-100 text-[--primary-teal] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><h4 class="font-bold text-lg mb-1">Cultura Justa</h4><p class="text-sm text-gray-600">Diferencia erro humano de comportamento de risco. Foca em aprender com as falhas, não em punir indivíduos, criando um ambiente seguro para relatar incidentes.</p></div>
+                            <div class="p-4"><div class="bg-teal-100 text-[--primary-teal] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg></div><h4 class="font-bold text-lg mb-1">Cultura de Relato</h4><p class="text-sm text-gray-600">Encoraja ativamente as equipes a relatar erros e "quase-erros" (near misses) sem medo, entendendo que cada relato é uma oportunidade de fortalecer o sistema.</p></div>
+                            <div class="p-4"><div class="bg-teal-100 text-[--primary-teal] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 0a2 2 0 100-4m0 4a2 2 0 110-4" /></svg></div><h4 class="font-bold text-lg mb-1">Cultura de Aprendizagem</h4><p class="text-sm text-gray-600">Utiliza os dados dos relatos para analisar tendências, identificar vulnerabilidades no sistema e implementar mudanças significativas para prevenir a recorrência de falhas.</p></div>
+                            <div class="p-4"><div class="bg-teal-100 text-[--primary-teal] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 21a6 6 0 006-6v-1a3 3 0 00-3-3H9a3 3 0 00-3 3v1a6 6 0 006 6z" /></svg></div><h4 class="font-bold text-lg mb-1">Cultura de Liderança</h4><p class="text-sm text-gray-600">A liderança demonstra compromisso visível com a segurança, alocando recursos, participando ativamente das iniciativas e modelando os comportamentos esperados.</p></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                        <div class="bg-red-50 p-6 rounded-lg shadow-lg border-l-4 border-red-400">
+                            <h3 class="text-xl font-bold text-red-800 mb-3">Cultura de Culpa (Comfort-Seeking)</h3>
+                            <p class="text-red-700 mb-4">Uma organização reativa, focada em manter a imagem e encontrar culpados.</p>
+                            <ul class="space-y-2 list-disc list-inside text-red-600">
+                                <li><strong>Foco:</strong> Quem errou?</li>
+                                <li>Os erros são vistos como falhas individuais (descuido, falta de atenção).</li>
+                                <li>As punições são comuns, o que inibe o relato de novos incidentes.</li>
+                                <li>A liderança não quer ouvir "más notícias" e busca dados que confirmem que está tudo bem.</li>
+                                <li>A responsabilidade é difusa e os problemas sistêmicos são ignorados.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg shadow-lg border-l-4 border-green-500">
+                            <h3 class="text-xl font-bold text-green-800 mb-3">Cultura de Segurança (Problem-Sensing)</h3>
+                            <p class="text-green-700 mb-4">Uma organização proativa, que busca ativamente por vulnerabilidades para corrigi-las.</p>
+                            <ul class="space-y-2 list-disc list-inside text-green-600">
+                                <li><strong>Foco:</strong> Por que o sistema permitiu o erro?</li>
+                                <li>Os erros são vistos como sintomas de fraquezas no sistema.</li>
+                                <li>A investigação busca entender o contexto e os fatores contribuintes.</li>
+                                <li>A liderança ouve ativamente a equipe e os pacientes para identificar riscos.</li>
+                                <li>O objetivo é aprender e fortalecer as barreiras de segurança para todos.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-[--primary-dark-blue] mb-4 text-center">Estratégias para Fortalecer a Cultura de Segurança</h3>
+                        <div class="max-w-4xl mx-auto">
+                            <ul class="space-y-4">
+                                <li class="flex items-start"><span class="text-2xl text-[--primary-teal] mr-3 mt-1">&rarr;</span><div><h4 class="font-bold">Implementar Safety Huddles e Rounds de Segurança</h4><p class="text-gray-600">Realizar reuniões diárias rápidas para discutir preocupações de segurança e envolver a liderança em visitas regulares às áreas assistenciais para conversar com a equipe sobre riscos e barreiras.</p></div></li>
+                                <li class="flex items-start"><span class="text-2xl text-[--primary-teal] mr-3 mt-1">&rarr;</span><div><h4 class="font-bold">Capacitar e Engajar Pacientes e Famílias</h4><p class="text-gray-600">Ensinar pacientes sobre seus direitos e como participar ativamente de seu cuidado. Envolvê-los em comitês e na análise de incidentes para que suas perspectivas ajudem a redesenhar processos.</p></div></li>
+                                <li class="flex items-start"><span class="text-2xl text-[--primary-teal] mr-3 mt-1">&rarr;</span><div><h4 class="font-bold">Adotar a Abordagem "Walk the Talk"</h4><p class="text-gray-600">A liderança deve alinhar discurso e prática. Se a segurança é prioridade, isso deve se refletir nas decisões, na alocação de recursos e no reconhecimento dos profissionais que identificam riscos.</p></div></li>
+                                <li class="flex items-start"><span class="text-2xl text-[--primary-teal] mr-3 mt-1">&rarr;</span><div><h4 class="font-bold">Usar Simulação e Treinamento em Equipe</h4><p class="text-gray-600">Promover treinamentos realísticos que melhorem não apenas as habilidades técnicas, mas também a comunicação, a coordenação e a capacidade da equipe de agir em conjunto durante crises.</p></div></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-xs italic text-center text-gray-500 mt-8">Conteúdo adaptado de: ISQua White Paper on Patient Safety for Healthcare Organisations.</p>
+                `,
+                'quiz': `
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Quiz de Conhecimentos</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">Teste seus conhecimentos sobre os temas abordados neste guia. Selecione a melhor resposta para cada questão e veja sua pontuação no final!</p>
+                    
+                    <div id="quiz-container" class="space-y-6"></div>
+                    
+                    <div id="quiz-controls" class="mt-8 text-center flex justify-center items-center space-x-4">
+                        <button id="submit-quiz-btn" class="bg-[--primary-dark-blue] text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-colors shadow-lg">Finalizar Quiz</button>
+                        <button id="redo-quiz-btn" class="bg-gray-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 transition-colors shadow-lg hidden">Refazer Teste</button>
+                    </div>
+
+                    <div id="quiz-results" class="mt-10 p-6 bg-teal-50 rounded-lg shadow-lg hidden text-center">
+                        <h3 class="text-2xl font-bold text-[--primary-dark-blue] mb-2">Seu Resultado</h3>
+                        <p id="quiz-score" class="text-4xl font-bold text-[--primary-teal] mb-4"></p>
+                        <p id="quiz-summary-message" class="text-lg text-gray-700"></p>
+                    </div>
+                `,
                 'referencias': `
                     <h2 class="section-title text-3xl font-bold text-center mb-2">Referências Bibliográficas</h2>
                     <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A base legal e científica para a estruturação e operação de unidades de emergência no Brasil.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Legislação e Normativas</h3><ul class="space-y-2 text-gray-700 list-disc list-inside"><li>BRASIL. Ministério da Saúde. Portaria de Consolidação nº 3, de 28 de setembro de 2017.</li><li>BRASIL. ANVISA. RDC nº 50, de 21 de fevereiro de 2002.</li><li>BRASIL. ANVISA. RDC nº 7, de 24 de fevereiro de 2010.</li><li>BRASIL. ANVISA. RDC nº 63, de 25 de novembro de 2011.</li><li>Conselho Federal de Medicina (CFM). Resolução nº 2.077/2014.</li><li>Conselho Federal de Enfermagem (COFEN). Resolução nº 543/2017.</li></ul></div>
-                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Gestão, Qualidade e Indicadores</h3><ul class="space-y-2 text-gray-700 list-disc list-inside"><li>DONABEDIAN, A. The quality of care: How can it be assessed?. <em>JAMA</em>, 1988.</li>
+                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Legislação e Normativas</h3><ul class="space-y-2 text-gray-700 list-disc list-inside">
+                            <li>BRASIL. Ministério da Saúde. Portaria de Consolidação nº 3, de 28 de setembro de 2017.</li>
+                            <li>BRASIL. ANVISA. RDC nº 50, de 21 de fevereiro de 2002.</li>
+                            <li>BRASIL. ANVISA. RDC nº 7, de 24 de fevereiro de 2010.</li>
+                            <li>BRASIL. ANVISA. RDC nº 63, de 25 de novembro de 2011.</li>
+                            <li>Conselho Federal de Enfermagem (COFEN). Resolução nº 743/2024.</li>
+                            <li>Conselho Federal de Enfermagem (COFEN). Parecer Normativo nº 1/2024/COFEN.</li>
+                        </ul></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">Gestão, Qualidade e Segurança</h3><ul class="space-y-2 text-gray-700 list-disc list-inside">
+                        <li>DONABEDIAN, A. The quality of care: How can it be assessed?. <em>JAMA</em>, 1988.</li>
                         <li>CHIAVENATO, I. <em>Gestão de Pessoas: O Novo Papel dos Recursos Humanos nas Organizações</em>. 2014.</li>
-                        <li>REICHHELD, F. F. The one number you need to grow. <em>Harvard Business Review</em>, 2003.</li>
-                        <li>MARQUES, R. A.; GUIMARÃES, T. A. Rotatividade e absenteísmo da força de trabalho em enfermagem. <em>RAS</em>, 2007.</li>
-                        <li>Grupo Brasileiro de Classificação de Risco. "Protocolo de Manchester".</li>
+                        <li>International Society for Quality in Health Care (ISQua). White Paper on Patient Safety for Healthcare Organisations. 2025.</li>
+                        <li>Institute for Healthcare Improvement (IHI). Ferramentas de Melhoria Contínua.</li>
                         <li>"ACLS - Suporte Avançado de Vida em Cardiologia". American Heart Association.</li>
                         <li>"Surviving Sepsis Campaign: International Guidelines".</li>
-                        <li>Institute for Healthcare Improvement (IHI). Ferramentas de Melhoria Contínua.</li></ul></div>
+                        </ul></div>
                     </div>
                 `,
                 'contato': `
@@ -385,6 +500,7 @@
                 if (tabId === 'processos') initializeAccordion();
                 if (tabId === 'estrutura') initializeStructureExplorer();
                 if (tabId === 'equipes') initializeCalculator();
+                if (tabId === 'quiz') initializeQuiz();
             }
 
             tabButtons.forEach(button => {
@@ -763,43 +879,70 @@
                 });
             }
             
-            // Calculadora
+            // Calculadora de Dimensionamento (Corrigida e Robusta)
             function initializeCalculator() {
-                 const inputs = [
-                    document.getElementById('cuidado-intensivo'),
-                    document.getElementById('cuidado-semi-intensivo'),
-                    document.getElementById('cuidado-intermediario'),
-                    document.getElementById('cuidado-minimo')
-                ];
-                if(!inputs[0]) return;
+                const inputs = {
+                    intensivo: document.getElementById('cuidado-intensivo'),
+                    semi: document.getElementById('cuidado-semi-intensivo'),
+                    alta: document.getElementById('cuidado-alta-dependencia'),
+                    intermediario: document.getElementById('cuidado-intermediario'),
+                    minimo: document.getElementById('cuidado-minimo')
+                };
 
                 const theResultEl = document.getElementById('the-result');
                 const totalStaffResultEl = document.getElementById('total-staff-result');
-                
+                const chartEl = document.getElementById('staffing-chart');
+
+                // Verificação robusta para garantir que todos os elementos necessários existem no DOM
+                const allElementsExist = Object.values(inputs).every(el => el !== null) && theResultEl && totalStaffResultEl && chartEl;
+
+                if (!allElementsExist) {
+                    console.error("Erro de inicialização: Um ou mais elementos da calculadora não foram encontrados no DOM. Verifique os IDs dos elementos no HTML.");
+                    return; // Interrompe a execução se algum elemento estiver faltando
+                }
+
+                // Parâmetros da Resolução COFEN 743/2024
                 const careHours = {
-                    intensivo: 17.9,
-                    semi: 9.4,
-                    intermediario: 5.6,
-                    minimo: 3.8
+                    intensivo: 18.0,
+                    semi: 10.0,
+                    alta: 10.0,
+                    intermediario: 6.0,
+                    minimo: 4.0
                 };
-                const dailyWorkHours = 6; 
+
+                const dailyWorkHours = 6; // Carga horária diária de referência
+                const ist = 1.15; // Índice de Segurança Técnica (15%)
                 let staffingChart = null;
 
                 function calculateStaffing() {
-                    const p_intensivo = parseFloat(inputs[0].value) || 0;
-                    const p_semi = parseFloat(inputs[1].value) || 0;
-                    const p_intermediario = parseFloat(inputs[2].value) || 0;
-                    const p_minimo = parseFloat(inputs[3].value) || 0;
+                    const p = {
+                        intensivo: parseFloat(inputs.intensivo.value) || 0,
+                        semi: parseFloat(inputs.semi.value) || 0,
+                        alta: parseFloat(inputs.alta.value) || 0,
+                        intermediario: parseFloat(inputs.intermediario.value) || 0,
+                        minimo: parseFloat(inputs.minimo.value) || 0
+                    };
+                    
+                    const totalTHE = (p.intensivo * careHours.intensivo) +
+                                     (p.semi * careHours.semi) +
+                                     (p.alta * careHours.alta) +
+                                     (p.intermediario * careHours.intermediario) +
+                                     (p.minimo * careHours.minimo);
 
-                    const totalTHE = (p_intensivo * careHours.intensivo) + (p_semi * careHours.semi) + (p_intermediario * careHours.intermediario) + (p_minimo * careHours.minimo);
-                    const totalQP = (totalTHE / dailyWorkHours) * 1.15; 
+                    const totalQP = (totalTHE / dailyWorkHours) * ist; 
 
                     theResultEl.textContent = totalTHE.toFixed(2);
                     totalStaffResultEl.textContent = Math.ceil(totalQP);
                     
-                    let nurse_pct = 0.33;
-                    if (p_intensivo > 0) nurse_pct = 0.52;
-                    else if (p_semi > 0) nurse_pct = 0.42;
+                    // Lógica para distribuição qualitativa conforme Parecer Normativo 01/2024
+                    let nurse_pct = 0.33; // Padrão para cuidado mínimo e intermediário
+                    if (p.intensivo > 0) {
+                        nurse_pct = 0.52;
+                    } else if (p.semi > 0) {
+                        nurse_pct = 0.42;
+                    } else if (p.alta > 0) {
+                        nurse_pct = 0.36;
+                    }
                     
                     const totalStaff = Math.ceil(totalQP);
                     const nurses = Math.ceil(totalStaff * nurse_pct);
@@ -821,22 +964,252 @@
                         }]
                     };
 
+                    const ctx = chartEl.getContext('2d');
+                    if (!ctx) return;
+
                     if (staffingChart) {
                         staffingChart.data = data;
                         staffingChart.update();
                     } else {
-                        const ctx = document.getElementById('staffing-chart').getContext('2d');
-                        if(!ctx) return;
                         staffingChart = new Chart(ctx, {
                             type: 'doughnut',
                             data: data,
-                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}` } } } }
+                            options: { 
+                                responsive: true, 
+                                maintainAspectRatio: false, 
+                                plugins: { 
+                                    legend: { position: 'top' }, 
+                                    tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}` } } 
+                                }
+                            }
                         });
                     }
                 }
 
-                inputs.forEach(input => input.addEventListener('input', calculateStaffing));
-                calculateStaffing();
+                Object.values(inputs).forEach(input => input.addEventListener('input', calculateStaffing));
+                calculateStaffing(); // Chama a função uma vez para inicializar com os valores padrão
+            }
+
+            // Quiz
+            function initializeQuiz() {
+                const quizContainer = document.getElementById('quiz-container');
+                if (!quizContainer) return;
+                
+                 const quizData = [
+                    { 
+                        question: "A RDC 50/2002 da ANVISA estabelece requisitos para projetos físicos de estabelecimentos de saúde. Qual dos seguintes itens NÃO é um de seus focos principais?", 
+                        options: ["Organização dos ambientes por sistemas funcionais", "Definição de fluxos para evitar contaminação cruzada", "Estabelecimento de protocolos clínicos tempo-sensíveis", "Dimensionamento mínimo de cômodos e corredores", "Controle de ventilação, iluminação e ruído"], 
+                        answer: "c",
+                        justification: "A RDC 50/2002 foca na infraestrutura física. Protocolos clínicos são abordados por outras normativas e pela gestão de processos da instituição, não sendo o escopo primário desta RDC."
+                    },
+                    { 
+                        question: "Um paciente chega à emergência com dor precordial intensa e sudorese. Após avaliação, a equipe suspeita de Infarto Agudo do Miocárdio (IAM). Segundo as melhores práticas, qual ação é a mais crucial e tempo-sensível no atendimento inicial?", 
+                        options: ["Administrar analgésico e aguardar melhora da dor", "Realizar um ECG em até 10 minutos", "Coletar exames laboratoriais e aguardar resultados", "Transferir imediatamente para a CTI sem exames prévios", "Iniciar fisioterapia respiratória"], 
+                        answer: "b",
+                        justification: "Para um paciente com suspeita de IAM, a realização de um Eletrocardiograma (ECG) em até 10 minutos da chegada é um indicador de qualidade fundamental para o diagnóstico rápido e início da terapia de reperfusão, impactando diretamente o prognóstico."
+                    },
+                    { 
+                        question: "Ao aplicar a abordagem XABCDE no politraumatizado, a equipe identifica uma hemorragia exsanguinante em um membro. Qual a conduta prioritária?", 
+                        options: ["Proceder para a avaliação das vias aéreas (A)", "Imobilizar a coluna cervical e depois conter o sangramento", "Controlar a hemorragia com um torniquete ou compressão direta antes de seguir para o 'A'", "Administrar oxigênio em alto fluxo", "Verificar o nível de consciência do paciente"], 
+                        answer: "c",
+                        justification: "A atualização dos protocolos de trauma (como o PHTLS) introduziu o 'X' (Hemorragia Exsanguinante) antes do 'A', pois a perda maciça de sangue pode levar ao óbito mais rapidamente do que uma via aérea obstruída. Portanto, o controle da hemorragia é a prioridade máxima e imediata."
+                    },
+                    { 
+                        question: "Uma Cultura de Segurança positiva é descrita como 'Problem-Sensing'. É correto afirmar que, nesta cultura, um erro individual é primariamente tratado com medidas disciplinares para reforçar a responsabilidade?",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. Uma cultura 'Problem-Sensing' é proativa e busca ativamente por falhas no sistema para corrigi-las antes que causem dano, não sendo focada em punição individual. A punição é característica de uma 'Cultura de Culpa'."
+                    },
+                     { 
+                        question: "Ao calcular o dimensionamento de enfermagem para uma Sala Vermelha (Cuidado Intensivo) com 4 leitos, segundo a Resolução COFEN 743/2024, qual seria a proporção mínima de enfermeiros em relação ao total de profissionais de enfermagem (enfermeiros + técnicos)?",
+                        options: ["33% Enfermeiros, 67% Técnicos/Auxiliares", "36% Enfermeiros, 64% Técnicos/Auxiliares", "42% Enfermeiros, 58% Técnicos", "52% Enfermeiros, 48% Técnicos", "A proporção é a mesma para todos os níveis de cuidado"],
+                        answer: "d",
+                        justification: "O Parecer Normativo nº 1/2024/COFEN, que orienta a Res. 743/2024, estabelece que para o Cuidado Intensivo, o percentual de enfermeiros deve ser de 52% do total da equipe de enfermagem, refletindo a alta complexidade e a necessidade de tomada de decisão constante."
+                    },
+                    { 
+                        question: "A equipe de melhoria contínua de uma emergência decide testar uma nova forma de comunicar a alta ao paciente para reduzir dúvidas pós-saída. Eles aplicam o novo método em 3 pacientes em um único dia e medem o número de ligações de retorno. Esta abordagem é um exemplo clássico de:", 
+                        options: ["Diagrama de Ishikawa", "Análise de Pareto", "Fluxograma de Processo", "Ciclo PDSA", "Análise de Causa Raiz (RCA)"], 
+                        answer: "d",
+                        justification: "O Ciclo PDSA (Planejar-Fazer-Estudar-Agir) é a ferramenta ideal para testar mudanças em pequena escala. O cenário descreve perfeitamente um ciclo: planejar a mudança, aplicá-la (fazer), avaliar o resultado (estudar) para depois agir."
+                    },
+                    { 
+                        question: "A Comissão de Controle de Infecção Hospitalar (CCIH) é responsável por implementar o Plano de Gerenciamento de Resíduos de Serviços de Saúde (PGRSS).",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. A CCIH foca na prevenção e controle de infecções. A responsabilidade pelo PGRSS é da Comissão de Gerenciamento de Resíduos de Serviços de Saúde (CGRSS), conforme a RDC 222/2018 da ANVISA."
+                    },
+                    { 
+                        question: "Um indicador como 'Taxa de adesão à higiene das mãos' é classificado por Donabedian como um indicador de:", 
+                        options: ["Estrutura", "Processo", "Resultado", "Impacto", "Eficiência"], 
+                        answer: "b",
+                        justification: "Indicadores de processo medem as ações e a conformidade com as melhores práticas. A adesão à higiene das mãos é uma ação, um 'fazer', portanto, um indicador de processo. Um indicador de resultado seria, por exemplo, a 'Taxa de Infecção Hospitalar'."
+                    },
+                    { 
+                        question: "Uma 'Cultura Justa' reconhece que erros podem acontecer, mas diferencia o erro humano (lapso, equívoco) de comportamentos de risco (negligência, violação de normas). A resposta a cada um deve ser diferente, focando no aprendizado no primeiro caso e em ações corretivas ou disciplinares no segundo.",
+                        type: 'tf',
+                        answer: "t",
+                        justification: "Verdadeiro. A essência da Cultura Justa é não tratar todos os erros da mesma forma. Ela busca entender as causas sistêmicas do erro humano e, ao mesmo tempo, responsabilizar por atos conscientemente inseguros, garantindo um equilíbrio entre aprendizado e accountability."
+                    },
+                    { 
+                        question: "Qual das seguintes comissões tem como principal função zelar pelo cumprimento do código de ética dos profissionais de enfermagem dentro da instituição?", 
+                        options: ["Comissão de Ética Médica (CEM)", "Núcleo de Segurança do Paciente (NSP)", "Comissão de Ética de Enfermagem (CEE)", "Comissão de Revisão de Prontuários", "CCIH"], 
+                        answer: "c",
+                        justification: "A Comissão de Ética de Enfermagem (CEE), conforme a Resolução COFEN nº 593/2018, é o órgão com função educativa, consultiva e fiscalizadora do exercício ético-profissional da equipe de enfermagem na instituição."
+                    },
+                    { 
+                        question: "A análise de um evento adverso revelou múltiplas causas, incluindo falha de comunicação, protocolo pouco claro e sobrecarga da equipe. A ferramenta mais apropriada para visualizar e organizar essas diferentes categorias de causas é:", 
+                        options: ["Gráfico de Pareto", "PDSA", "FMEA", "Fluxograma", "Diagrama de Ishikawa"], 
+                        answer: "e",
+                        justification: "O Diagrama de Ishikawa, ou Espinha de Peixe, é ideal para a Análise de Causa Raiz (RCA) de eventos que já ocorreram, pois ajuda a equipe a organizar e explorar sistematicamente as diversas causas potenciais agrupadas em categorias (ex: Método, Mão de Obra, Material etc.)."
+                    },
+                     { 
+                        question: "No Protocolo de Manchester, um paciente classificado como LARANJA deve receber atendimento médico em, no máximo, 60 minutos.",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. A cor LARANJA significa 'Muito Urgente' e o atendimento deve ocorrer em até 10 minutos. O tempo de até 60 minutos corresponde à cor AMARELA ('Urgente')."
+                    },
+                    { 
+                        question: "Qual o objetivo principal do indicador 'Taxa de Readmissão em 72h'?", 
+                        options: ["Medir a satisfação do paciente com a alta", "Avaliar a eficiência da equipe de limpeza do leito", "Medir a rotatividade de leitos na emergência", "Avaliar a qualidade da alta e a resolução do problema do paciente", "Controlar os custos com reinternações"], 
+                        answer: "d",
+                        justification: "Uma readmissão precoce pela mesma queixa sugere que o problema do paciente pode não ter sido resolvido adequadamente, ou que as orientações de alta foram ineficazes. Portanto, é um forte indicador da qualidade e segurança do processo de alta."
+                    },
+                    { 
+                        question: "Uma 'Cultura de Relato' é eficaz mesmo que a liderança não forneça feedback sobre os incidentes reportados, desde que os profissionais não sejam punidos.",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. Para uma Cultura de Relato ser verdadeiramente eficaz e sustentável, é essencial que a liderança 'feche o ciclo', ou seja, reconheça os relatos, dê feedback à equipe sobre as ações tomadas e demonstre que o aprendizado ocorreu. Sem isso, a equipe perde a motivação para relatar."
+                    },
+                     { 
+                        question: "A ferramenta SIPOC (Supplier-Input-Process-Output-Customer) é mais adequada para qual finalidade na gestão de processos?", 
+                        options: ["Detalhar cada passo de uma tarefa específica, incluindo exceções", "Oferecer uma visão de alto nível do processo, definindo suas fronteiras, entradas e saídas", "Testar pequenas mudanças de forma rápida e iterativa", "Identificar a causa raiz de um evento adverso que já ocorreu", "Priorizar quais problemas devem ser resolvidos primeiro"], 
+                        answer: "b",
+                        justification: "SIPOC é uma ferramenta de mapeamento de alto nível. Ela não entra em detalhes, mas é excelente para delimitar o escopo de um processo, mostrando quem são os fornecedores, quais os insumos, quais as etapas macro, quais as saídas e quem são os clientes, antes de um mergulho mais profundo."
+                    },
+                    { 
+                        question: "Para um paciente com suspeita de AVC isquêmico agudo, a meta 'porta-agulha' (tempo da chegada até o início do trombolítico) é um indicador de processo crítico. Qual o tempo máximo recomendado?", 
+                        options: ["10 minutos", "30 minutos", "45 minutos", "60 minutos", "90 minutos"], 
+                        answer: "d",
+                        justification: "As diretrizes internacionais para o tratamento do AVCi estabelecem uma meta de tempo porta-agulha inferior a 60 minutos para maximizar as chances de um bom desfecho neurológico. Tempos menores são ainda melhores, mas 60 minutos é o padrão de qualidade."
+                    },
+                    { 
+                        question: "A RDC nº 7/2010 da ANVISA, que define requisitos para UTIs, não tem relevância para as Salas de Emergência (Salas Vermelhas), pois são áreas distintas.",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. Embora sejam áreas distintas, as Salas Vermelhas frequentemente funcionam como 'UTIs temporárias' para estabilização de pacientes críticos. Portanto, os princípios da RDC 7/2010 sobre recursos humanos, equipamentos e infraestrutura são altamente relevantes e frequentemente usados como referência para garantir a qualidade e segurança nessas áreas."
+                    },
+                    { 
+                        question: "A implementação de 'Safety Huddles' (reuniões rápidas de segurança) é uma estratégia que impacta principalmente qual pilar da Cultura de Segurança?", 
+                        options: ["Apenas a Cultura de Liderança", "Apenas a Cultura de Relato", "Principalmente as culturas de Relato e de Aprendizagem, ao discutir riscos diários", "Apenas a Cultura Justa", "Não tem relação com a Cultura de Segurança"], 
+                        answer: "c",
+                        justification: "Os huddles diários permitem que a equipe de linha de frente relate proativamente os riscos e preocupações (Cultura de Relato) e que a equipe discuta e aprenda com essas questões em tempo real (Cultura de Aprendizagem), fortalecendo a segurança antes que os incidentes ocorram."
+                    },
+                    { 
+                        question: "Uma organização com 'baixa maturidade' em Cultura de Segurança tende a focar seus esforços de medição em:", 
+                        options: ["Indicadores de processo proativos, como adesão a checklists", "Pesquisas de clima de segurança com planos de ação robustos", "Indicadores de resultado reativos, como número de quedas e infecções, após eles ocorrerem", "Análise aprofundada de 'near misses' (quase-erros)", "Envolvimento de pacientes na identificação de riscos"], 
+                        answer: "c",
+                        justification: "Organizações menos maduras em segurança geralmente são reativas. Elas medem o que já deu errado (indicadores de resultado como quedas, infecções) em vez de medir proativamente os processos e comportamentos que poderiam prevenir esses desfechos negativos."
+                    },
+                    { 
+                        question: "A principal diferença entre uma abordagem de 'Cultura de Culpa' e uma 'Cultura Justa' é a eliminação total de medidas disciplinares na Cultura Justa.",
+                        type: 'tf',
+                        answer: "f",
+                        justification: "Falso. A principal diferença não é a eliminação da disciplina, mas a sua aplicação criteriosa. A Cultura Justa não isenta a responsabilidade por atos negligentes ou violações intencionais de normas. Ela busca entender o 'porquê' do erro humano não intencional, mas ainda prevê medidas disciplinares para comportamentos de risco escolhidos conscientemente."
+                    }
+                ];
+
+                const buildQuiz = () => {
+                    quizContainer.innerHTML = ''; // Limpa o container
+                    quizData.forEach((item, index) => {
+                        let optionsHTML = '';
+                        if (item.type === 'tf') {
+                            optionsHTML = `
+                                <div class="space-y-2"><label class="flex items-center cursor-pointer"><input type="radio" name="question${index}" value="t" class="mr-2 h-4 w-4"> Verdadeiro</label></div>
+                                <div class="space-y-2"><label class="flex items-center cursor-pointer"><input type="radio" name="question${index}" value="f" class="mr-2 h-4 w-4"> Falso</label></div>
+                            `;
+                        } else {
+                            optionsHTML = item.options.map((opt, i) => {
+                                const val = String.fromCharCode(97 + i);
+                                return `<div class="space-y-2"><label class="flex items-center cursor-pointer"><input type="radio" name="question${index}" value="${val}" class="mr-2 h-4 w-4"> ${opt}</label></div>`;
+                            }).join('');
+                        }
+                        
+                        quizContainer.innerHTML += `
+                            <div id="q-container-${index}" class="quiz-question bg-white p-6 rounded-lg shadow-md border-l-4 border-gray-200">
+                                <p class="font-bold text-lg mb-4">${index + 1}. ${item.question}</p>
+                                <div class="space-y-3 text-gray-700">${optionsHTML}</div>
+                                <div id="feedback-${index}" class="mt-4 text-sm font-semibold"></div>
+                                <div id="justification-${index}" class="quiz-justification hidden"></div>
+                            </div>
+                        `;
+                    });
+                };
+                
+                buildQuiz(); // Constrói o quiz na inicialização
+
+                const submitButton = document.getElementById('submit-quiz-btn');
+                const redoButton = document.getElementById('redo-quiz-btn');
+                
+                const handleSubmit = () => {
+                    let score = 0;
+                    quizData.forEach((item, index) => {
+                        const qContainer = document.getElementById(`q-container-${index}`);
+                        const feedbackEl = document.getElementById(`feedback-${index}`);
+                        const justificationEl = document.getElementById(`justification-${index}`);
+                        const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                        const options = document.querySelectorAll(`input[name="question${index}"]`);
+                        
+                        options.forEach(option => option.disabled = true);
+                        
+                        justificationEl.innerHTML = `<strong>Justificativa:</strong> ${item.justification}`;
+                        justificationEl.classList.remove('hidden');
+
+                        if (selected) {
+                            if (selected.value === item.answer) {
+                                score++;
+                                qContainer.classList.add('correct');
+                                feedbackEl.textContent = 'Resposta correta!';
+                                feedbackEl.className = 'quiz-feedback correct';
+                            } else {
+                                qContainer.classList.add('incorrect');
+                                feedbackEl.textContent = `Incorreto.`;
+                                feedbackEl.className = 'quiz-feedback incorrect';
+                            }
+                        } else {
+                            qContainer.classList.add('incorrect');
+                            feedbackEl.textContent = `Você não respondeu.`;
+                            feedbackEl.className = 'quiz-feedback incorrect';
+                        }
+                    });
+
+                    const resultsContainer = document.getElementById('quiz-results');
+                    const scoreEl = document.getElementById('quiz-score');
+                    const messageEl = document.getElementById('quiz-summary-message');
+                    
+                    scoreEl.textContent = `${score} / ${quizData.length}`;
+                    let message = "Continue estudando para aprimorar seus conhecimentos!";
+                    if (score >= 18) message = "Excelente! Você domina os conceitos de segurança e gestão em emergência!";
+                    else if (score >= 15) message = "Muito bom! Você tem um ótimo conhecimento sobre os temas.";
+                    
+                    messageEl.textContent = message;
+                    resultsContainer.classList.remove('hidden');
+                    
+                    submitButton.classList.add('hidden');
+                    redoButton.classList.remove('hidden');
+                };
+
+                const handleRedo = () => {
+                    const resultsContainer = document.getElementById('quiz-results');
+                    resultsContainer.classList.add('hidden');
+                    
+                    buildQuiz(); // Reconstrói o quiz
+                    
+                    redoButton.classList.add('hidden');
+                    submitButton.classList.remove('hidden');
+                };
+                
+                submitButton.addEventListener('click', handleSubmit);
+                redoButton.addEventListener('click', handleRedo);
             }
             
             switchTab('visao-geral'); // Initialize with the first tab
