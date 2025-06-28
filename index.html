@@ -244,10 +244,69 @@
                     <div id="process-accordion"></div>
                 `,
                 'comissoes': `
-                    <h2 class="section-title text-3xl font-bold text-center mb-2">Comissões Obrigatórias e Governança Clínica</h2>
-                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A segurança e a qualidade do cuidado são sustentadas por comissões obrigatórias que supervisionam processos críticos na unidade.</p>
-                    <div class="mb-8"><h3 class="text-2xl font-semibold text-gray-800 mb-4">Comissões Fundamentais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">NSP - Núcleo de Segurança do Paciente</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Promove a cultura de segurança e implementa protocolos para prevenir danos aos pacientes.</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: ANVISA RDC nº 36/2013</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CCIH - Comissão de Controle de Infecção Hospitalar</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Desenvolve ações para prevenir e controlar infecções relacionadas à assistência à saúde (IRAS).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Portaria MS nº 2.616/1998</p></div><div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CIPA - Comissão Interna de Prevenção de Acidentes</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Focada na segurança dos trabalhadores. Obrigatória a partir de 20 funcionários (Grau de Risco 3).</p><p class="text-xs italic text-gray-500 mt-3 border-t pt-2">Referência: Norma Regulamentadora nº 5 (NR-5)</p></div></div></div>
-                    <div><h3 class="text-2xl font-semibold text-gray-800 mb-4">Outras Comissões de Governança Essenciais</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Ética Médica (CEM)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Fiscaliza o exercício ético da medicina dentro da instituição, atuando como um braço do CRM.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.152/2016</p></div><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Ética de Enfermagem (CEE)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Zela pelo cumprimento do código de ética da enfermagem e orienta a equipe sobre práticas adequadas.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução COFEN n° 593/2018</p></div><div class="card bg-slate-50 p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Revisão de Prontuários</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Avalia a qualidade dos registros nos prontuários, garantindo que sejam completos, legíveis e adequados legalmente.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 1.638/2002</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Revisão de Óbitos</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Analisa os óbitos ocorridos na unidade para identificar oportunidades de melhoria no processo assistencial.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Resolução CFM n° 2.171/2017</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Farmácia e Terapêutica (CFT)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Seleciona os medicamentos que farão parte do arsenal da unidade, com base em eficácia, segurança e custo.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: Portaria MS n° 4.217/2010</p></div><div class="card bg-white p-4 rounded-lg border h-full flex flex-col"><h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Comissão de Gerenciamento de Resíduos (CGRSS)</h4><p class="text-sm text-gray-600 mb-3 flex-grow">Elabora e supervisiona o Plano de Gerenciamento de Resíduos de Serviços de Saúde (PGRSS).</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Ref.: ANVISA RDC n° 222/2018</p></div></div></div>
+                    <h2 class="section-title text-3xl font-bold text-center mb-2">Comissões, Políticas e Protocolos Essenciais</h2>
+                    <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">A segurança e a qualidade do cuidado são sustentadas por comissões obrigatórias, políticas claras e protocolos bem definidos que orientam a prática diária.</p>
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Comissões Fundamentais</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">NSP - Núcleo de Segurança do Paciente</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Promove a cultura de segurança e implementa os protocolos básicos para prevenir danos aos pacientes.</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Referência: RDC nº 36/2013</p></div>
+                                <div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CCIH - Comissão de Controle de Infecção</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Desenvolve e supervisiona ações para prevenir e controlar infecções relacionadas à assistência à saúde (IRAS).</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Referência: Portaria MS nº 2.616/1998</p></div>
+                                <div class="card bg-white p-6 rounded-lg shadow-lg h-full flex flex-col"><h3 class="font-bold text-xl text-[--primary-dark-blue] mb-3">CIPA - Comissão de Prevenção de Acidentes</h3><p class="text-sm text-gray-600 mb-3 flex-grow">Focada na segurança e saúde dos trabalhadores. Obrigatória a partir de 20 funcionários (Grau de Risco 3).</p><p class="text-xs italic text-gray-500 mt-auto border-t pt-2">Referência: NR-5</p></div>
+                            </div>
+                        </div>
+                         <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Políticas e Protocolos Mínimos Essenciais</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+                                <div>
+                                    <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos Clínicos</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                        <li>Protocolo de Acolhimento e Classificação de Risco</li>
+                                        <li>Protocolo de Dor Torácica (IAM)</li>
+                                        <li>Protocolo de Acidente Vascular Cerebral (AVC)</li>
+                                        <li>Protocolo de Sepse</li>
+                                        <li>Protocolo de Atendimento ao Trauma (XABCDE)</li>
+                                        <li>Protocolo de Atendimento à Parada Cardiorrespiratória (RCP)</li>
+                                        <li>Protocolo de Transferência do Paciente (Intra e Inter-hospitalar)</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Segurança do Paciente</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                        <li>Identificação Segura do Paciente</li>
+                                        <li>Prevenção de Quedas</li>
+                                        <li>Prevenção de Lesão por Pressão</li>
+                                        <li>Uso Seguro de Medicamentos</li>
+                                        <li>Cirurgia Segura (Checklists)</li>
+                                        <li>Higienização das Mãos</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Políticas Organizacionais e de Gestão</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                        <li>Política de Admissão, Transferência e Alta</li>
+                                        <li>Política de Gestão de Recursos Humanos</li>
+                                        <li>Política de Gestão de Riscos</li>
+                                        <li>Política de Gestão da Informação e Prontuário</li>
+                                        <li>Gestão de Materiais e Medicamentos</li>
+                                        <li>Plano de Atendimento a Catástrofes</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Enfermagem</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                        <li>Punção Venosa Periférica</li>
+                                        <li>Sondagens (Vesical, Nasogástrica/Enteral)</li>
+                                        <li>Administração Segura de Medicamentos</li>
+                                        <li>Cuidados com Lesões e Curativos</li>
+                                        <li>Preparo para Procedimentos Invasivos</li>
+                                        <li>Contenção Mecânica</li>
+                                        <li>Cuidados Pós-Morte</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 `,
                 'indicadores': `
                     <h2 class="section-title text-3xl font-bold text-center mb-2">Dashboard de Indicadores de Emergência</h2>
@@ -439,31 +498,16 @@
                                     <p class="text-sm text-gray-600">Reduzimos desperdícios e tempos de espera, melhorando a eficiência na alocação de recursos e no fluxo de pacientes.</p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800">Fortalecer a Segurança do Paciente</h4>
-                                    <p class="text-sm text-gray-600">Implementamos sistemas para gestão de riscos, análise de eventos adversos e adesão a protocolos, alinhados às metas internacionais.</p>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Monitorar o Desempenho com Dados</h4>
-                                    <p class="text-sm text-gray-600">Desenvolvemos KPIs de estrutura, processo e resultado que fornecem uma visão clara para a tomada de decisão estratégica.</p>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Melhorar a Experiência do Paciente</h4>
-                                    <p class="text-sm text-gray-600">Criamos ferramentas para coletar e analisar dados de satisfação, focando no cuidado centrado no paciente.</p>
+                                    <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Enfermagem</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                        <li>Punção Venosa Periférica</li>
+                                        <li>Sondagem Vesical</li>
+                                        <li>Administração de Medicamentos</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="text-center">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Pronto para elevar o padrão de cuidado da sua organização?</h3>
-                            <p class="text-gray-600 mb-4">Entre em contato para agendar uma demonstração.</p>
-                            <a href="mailto:geovanamtomasella@gmail.com" class="inline-block bg-[--primary-dark-blue] text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-colors">
-                                Agende uma Demonstração
-                            </a>
-                            <div class="mt-4 text-sm text-gray-500">
-                                <p>geovanamtomasella@gmail.com</p>
-                                <p>(12) 99123-9611</p>
-                            </div>
-                        </div>
+                        <p class="text-xs italic text-center text-gray-500 mt-4">Referências: Manuais de Acreditação (ONA, Qmentum, JCI); Diretrizes do Ministério da Saúde e Conselhos de Classe.</p>
                     </div>
                 `
             };
@@ -689,8 +733,8 @@
                         <div class="mt-8 pt-6 border-t">
                             <h4 class='font-bold text-lg text-[--primary-dark-blue] mb-2'>Legenda dos Símbolos do Fluxograma</h4>
                             <ul class="space-y-3 text-sm text-gray-700">
-                                <li class="flex items-center"><div class="w-8 h-8 flex items-center justify-center text-2xl text-blue-600 mr-3">■</div> <div><strong>Processo/Ação:</strong> Representa uma etapa ou tarefa a ser executada no fluxo.</div></li>
-                                <li class="flex items-center"><div class="w-8 h-8 flex items-center justify-center text-2xl text-yellow-600 mr-3">◆</div> <div><strong>Decisão:</strong> Indica um ponto no processo onde uma decisão deve ser tomada, geralmente resultando em dois ou mais caminhos.</div></li>
+                                <li class="flex items-center"><div class="inline-block w-8 h-8 p-1 text-center bg-blue-100 border-l-4 border-blue-500 rounded-lg shadow mr-3"></div> <div><strong>Processo/Ação:</strong> Representa uma etapa ou tarefa a ser executada no fluxo.</div></li>
+                                <li class="flex items-center"><div class="inline-block w-8 h-8 p-1 text-center bg-gray-200 shadow mr-3" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);"></div> <div><strong>Decisão:</strong> Indica um ponto no processo onde uma decisão deve ser tomada, geralmente resultando em dois ou mais caminhos.</div></li>
                                 <li class="flex items-center"><div class="w-8 h-8 flex items-center justify-center text-2xl text-gray-500 mr-3">&darr;</div> <div><strong>Seta de Fluxo:</strong> Mostra a direção e a sequência das etapas do processo.</div></li>
                             </ul>
                         </div>
@@ -776,42 +820,51 @@
                         title: "6. Políticas e Protocolos Mínimos",
                         details: `Para garantir a padronização, a segurança e a eficiência do cuidado, toda unidade de emergência deve desenvolver, implementar e treinar suas equipes em um conjunto essencial de políticas e protocolos gerenciados. Eles servem como um guia para a tomada de decisão rápida e baseada em evidências.`,
                         example: `<h4 class="font-semibold text-gray-800 mb-3">Checklist de Documentos Essenciais:</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
                             <div>
-                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos Clínicos Tempo-Sensíveis</h5>
+                                <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos Clínicos</h4>
                                 <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Protocolo de Acolhimento e Classificação de Risco</li>
                                     <li>Protocolo de Dor Torácica (IAM)</li>
                                     <li>Protocolo de Acidente Vascular Cerebral (AVC)</li>
                                     <li>Protocolo de Sepse</li>
-                                    <li>Protocolo de Atendimento ao Trauma</li>
+                                    <li>Protocolo de Atendimento ao Trauma (XABCDE)</li>
+                                    <li>Protocolo de Atendimento à Parada Cardiorrespiratória (RCP)</li>
+                                    <li>Protocolo de Transferência do Paciente (Intra e Inter-hospitalar)</li>
                                 </ul>
                             </div>
                             <div>
-                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Segurança do Paciente</h5>
+                                <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Segurança do Paciente</h4>
                                 <ul class="list-disc list-inside space-y-1 text-gray-700">
                                     <li>Identificação Segura do Paciente</li>
                                     <li>Prevenção de Quedas</li>
                                     <li>Prevenção de Lesão por Pressão</li>
-                                    <li>Uso Seguro de Medicamentos (ênfase em alta vigilância)</li>
-                                    <li>Cirurgia Segura (se aplicável a procedimentos)</li>
+                                    <li>Uso Seguro de Medicamentos</li>
+                                    <li>Cirurgia Segura (checklists)</li>
                                     <li>Higienização das Mãos</li>
                                 </ul>
                             </div>
                             <div>
-                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Políticas Organizacionais e de Fluxo</h5>
+                                <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Políticas Organizacionais e de Gestão</h4>
                                 <ul class="list-disc list-inside space-y-1 text-gray-700">
-                                    <li>Política de Classificação de Risco</li>
                                     <li>Política de Admissão, Transferência e Alta</li>
+                                    <li>Política de Gestão de Recursos Humanos</li>
+                                    <li>Política de Gestão de Riscos</li>
+                                    <li>Política de Gestão da Informação e Prontuário</li>
+                                    <li>Gestão de Materiais e Medicamentos</li>
                                     <li>Plano de Atendimento a Catástrofes</li>
-                                    <li>Política de Gerenciamento de Conflitos e Comportamento Disruptivo</li>
                                 </ul>
                             </div>
                             <div>
-                                <h5 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Enfermagem</h5>
+                                <h4 class="font-bold text-lg text-[--primary-dark-blue] mb-2">Protocolos de Enfermagem</h4>
                                 <ul class="list-disc list-inside space-y-1 text-gray-700">
-                                    <li>Punção Venosa Periférica</li>
-                                    <li>Sondagem Vesical</li>
-                                    <li>Administração de Medicamentos</li>
+                                    <li>Punção Venosa Periférica e Central</li>
+                                    <li>Sondagens (Vesical, Nasogástrica/Enteral)</li>
+                                    <li>Administração Segura de Medicamentos</li>
+                                    <li>Cuidados com Lesões e Curativos Complexos</li>
+                                    <li>Preparo para Procedimentos Invasivos</li>
+                                    <li>Contenção Mecânica</li>
+                                    <li>Cuidados Pós-Morte</li>
                                 </ul>
                             </div>
                         </div>
